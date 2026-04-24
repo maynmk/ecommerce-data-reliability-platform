@@ -40,7 +40,7 @@ ecommerce-data-reliability-platform/
 
 ## Escopo atual
 
-Este repositorio contem a estrutura inicial do projeto, a infraestrutura local minima para PostgreSQL e um pipeline Python para carregar os CSVs brutos da Olist no schema `bronze`. API, dashboard, dbt e configuracoes mais avancadas de CI ainda nao foram implementados.
+Este repositorio contem a infraestrutura local minima para PostgreSQL, um pipeline Python para carregar os CSVs brutos da Olist no schema `bronze` e a configuracao do dbt Core para gerar modelos staging no schema `silver`. API, dashboard e modelos gold ainda nao foram implementados.
 
 ## Documentacao
 
@@ -56,3 +56,23 @@ Este repositorio contem a estrutura inicial do projeto, a infraestrutura local m
 4. Execute a inicializacao do banco com `python pipelines/init_database.py`.
 5. Execute a carga bronze com `python pipelines/load_bronze.py`.
 6. Consulte `docs/how_to_run.md` para os comandos de execucao.
+
+## dbt (staging/silver)
+
+1. Copie `dbt/profiles.yml.example` para `dbt/profiles.yml` (este arquivo e ignorado pelo Git).
+2. Rode os comandos a partir da pasta `dbt/`:
+
+```bash
+dbt debug --profiles-dir .
+dbt run --profiles-dir .
+dbt test --profiles-dir .
+```
+
+Se o comando `dbt` nao estiver no PATH do Windows, use:
+
+```powershell
+$DbtExe = (py -3.12 -c "import sys; from pathlib import Path; print(Path(sys.executable).parent / 'Scripts' / 'dbt.exe')")
+& $DbtExe debug --project-dir dbt --profiles-dir dbt
+& $DbtExe run --project-dir dbt --profiles-dir dbt
+& $DbtExe test --project-dir dbt --profiles-dir dbt
+```

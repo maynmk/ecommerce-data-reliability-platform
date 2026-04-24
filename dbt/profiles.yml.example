@@ -1,0 +1,13 @@
+ecommerce_data_reliability_platform:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('DATABASE_HOST', 'localhost') }}"
+      port: "{{ env_var('DATABASE_PORT', '5432') | int }}"
+      user: "{{ env_var('DATABASE_USER', 'postgres') }}"
+      pass: "{{ env_var('DATABASE_PASSWORD', 'postgres') }}"
+      dbname: "{{ env_var('DATABASE_NAME', 'ecommerce') }}"
+      schema: silver
+      threads: 4
+      keepalives_idle: 0

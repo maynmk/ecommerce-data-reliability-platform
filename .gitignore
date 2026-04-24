@@ -26,3 +26,7 @@ node_modules/
 .next/
 dist/
 build/
+dbt/profiles.yml
+dbt/target/
+dbt/dbt_packages/
+dbt/.user.yml

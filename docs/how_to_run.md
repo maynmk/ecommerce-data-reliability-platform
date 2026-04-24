@@ -81,4 +81,4 @@ O pipeline:
 
 ## Observacao
 
-Nesta etapa, o projeto sobe apenas o PostgreSQL. As camadas de pipeline, API, dbt e frontend ainda nao foram implementadas.
+Nesta etapa, o projeto sobe o PostgreSQL, executa pipelines Python e ja possui configuracao inicial de dbt para staging/silver. API, frontend e modelos gold ainda nao foram implementados.
