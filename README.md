@@ -52,4 +52,6 @@ Este repositorio contem apenas a estrutura inicial do projeto e a infraestrutura
 
 1. Copie `.env.example` para `.env`.
 2. Suba o PostgreSQL com Docker Compose.
-3. Consulte `docs/how_to_run.md` para os comandos de execucao.
+3. Instale as dependencias Python com `pip install -r requirements.txt`.
+4. Execute a inicializacao do banco com `python pipelines/init_database.py`.
+5. Consulte `docs/how_to_run.md` para os comandos de execucao.
