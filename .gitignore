@@ -10,3 +10,4 @@ dist/
 build/
 dbt/target/
 logs/
+/data/raw/*.csv

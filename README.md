@@ -40,7 +40,7 @@ ecommerce-data-reliability-platform/
 
 ## Escopo atual
 
-Este repositorio contem apenas a estrutura inicial do projeto e a infraestrutura local minima para subir um banco PostgreSQL. Pipelines, API, dashboard e configuracoes de CI ainda nao foram implementados.
+Este repositorio contem a estrutura inicial do projeto, a infraestrutura local minima para PostgreSQL e um pipeline Python para carregar os CSVs brutos da Olist no schema `bronze`. API, dashboard, dbt e configuracoes mais avancadas de CI ainda nao foram implementados.
 
 ## Documentacao
 
@@ -54,4 +54,5 @@ Este repositorio contem apenas a estrutura inicial do projeto e a infraestrutura
 2. Suba o PostgreSQL com Docker Compose.
 3. Instale as dependencias Python com `pip install -r requirements.txt`.
 4. Execute a inicializacao do banco com `python pipelines/init_database.py`.
-5. Consulte `docs/how_to_run.md` para os comandos de execucao.
+5. Execute a carga bronze com `python pipelines/load_bronze.py`.
+6. Consulte `docs/how_to_run.md` para os comandos de execucao.

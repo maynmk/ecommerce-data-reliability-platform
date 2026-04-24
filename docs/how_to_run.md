@@ -51,6 +51,26 @@ Se quiser remover tambem o volume persistido do banco:
 docker compose down -v
 ```
 
+## 4. Inicializar schemas e auditoria
+
+```bash
+python pipelines/init_database.py
+```
+
+## 5. Carregar os CSVs brutos no schema bronze
+
+```bash
+python pipelines/load_bronze.py
+```
+
+O pipeline:
+
+- le todos os CSVs de `data/raw`
+- cria ou substitui uma tabela em `bronze` para cada arquivo
+- padroniza nomes de tabelas e colunas
+- adiciona colunas tecnicas de ingestao
+- registra a execucao em `audit.pipeline_runs`
+
 ## Conexao esperada
 
 - Host: `localhost`
