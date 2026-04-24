@@ -45,6 +45,7 @@ Este repositorio contem apenas a estrutura inicial do projeto e a infraestrutura
 ## Documentacao
 
 - Arquitetura: [docs/architecture.md](/e:/PORTFOLIO-DATA/ecommerce-data-reliability-platform/docs/architecture.md)
+- Workflow Git: [docs/git_workflow.md](/e:/PORTFOLIO-DATA/ecommerce-data-reliability-platform/docs/git_workflow.md)
 - Execucao local: [docs/how_to_run.md](/e:/PORTFOLIO-DATA/ecommerce-data-reliability-platform/docs/how_to_run.md)
 
 ## Como iniciar

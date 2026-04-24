@@ -1,0 +1,14 @@
+<type>: <short description>
+
+# Types:
+# feat     New feature or pipeline step
+# fix      Bug fix or correction
+# docs     Documentation updates
+# test     Tests or validation coverage
+# refactor Internal code cleanup without behavior change
+# chore    Tooling, config, environment, project maintenance
+
+# Examples:
+# feat: add Olist raw data ingestion
+# docs: expand architecture decisions
+# chore: configure local development environment
