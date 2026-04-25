@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "E-commerce Analytics Dashboard",
+  title: "Dashboard de Métricas (Gold)",
   description:
-    "Dashboard de métricas analíticas (camada Gold) do ecommerce-data-reliability-platform.",
+    "Dashboard de métricas analíticas da camada Gold do ecommerce-data-reliability-platform.",
 };
 
 export default function RootLayout({

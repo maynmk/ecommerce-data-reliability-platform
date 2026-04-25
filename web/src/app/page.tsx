@@ -54,7 +54,7 @@ export default async function Home() {
       <header className="border-b border-zinc-200 bg-white">
         <div className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-6">
           <h1 className="text-xl font-semibold text-zinc-900">
-            E-commerce Analytics Dashboard
+            Dashboard de Métricas (Gold)
           </h1>
           <p className="text-sm text-zinc-600">
             Métricas da camada Gold (dbt) consumidas via FastAPI.
@@ -64,7 +64,7 @@ export default async function Home() {
 
       <main className="mx-auto max-w-6xl space-y-10 px-6 py-10">
         <Section
-          title="Overview"
+          title="Visão geral"
           description={[
             lastSalesDate ? `Última data de vendas: ${formatDate(lastSalesDate)}.` : null,
             latestQualityCheckedAt
@@ -134,7 +134,7 @@ export default async function Home() {
         </Section>
 
         <Section
-          title="Sales Daily"
+          title="Vendas diárias"
           description="Série diária de pedidos, receita, frete, ticket e score médio de review."
         >
           <DataTable
@@ -183,7 +183,7 @@ export default async function Home() {
         </Section>
 
         <Section
-          title="Delivery Performance"
+          title="Performance de entrega"
           description="Performance de entrega por UF do cliente."
         >
           <DataTable
@@ -231,7 +231,7 @@ export default async function Home() {
         </Section>
 
         <Section
-          title="Seller Performance"
+          title="Performance de sellers"
           description="Top vendedores por receita (gold.mart_seller_performance)."
         >
           <DataTable
@@ -275,7 +275,7 @@ export default async function Home() {
         </Section>
 
         <Section
-          title="Product Performance"
+          title="Performance de produtos"
           description="Top categorias por receita (gold.mart_product_performance)."
         >
           <DataTable
@@ -318,7 +318,7 @@ export default async function Home() {
         </Section>
 
         <Section
-          title="Data Quality Center"
+          title="Central de qualidade de dados"
           description="Histórico recente de métricas de qualidade (gold.mart_data_quality_summary)."
         >
           <DataTable
@@ -344,8 +344,8 @@ export default async function Home() {
 
       <footer className="border-t border-zinc-200 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-6 text-xs text-zinc-500">
-          Fonte: schema <span className="font-mono">gold</span> via FastAPI •
-          Endpoints <span className="font-mono">/metrics/*</span>
+          Fonte: schema <span className="font-mono">gold</span> via FastAPI • Endpoints{" "}
+          <span className="font-mono">/metrics/*</span>
         </div>
       </footer>
     </div>
