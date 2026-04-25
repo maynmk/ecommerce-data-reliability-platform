@@ -17,22 +17,22 @@ export function DataTable<Row extends Record<string, unknown>>({
   caption?: string;
 }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white shadow-sm">
+    <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
           {caption ? (
-            <caption className="px-4 py-3 text-left text-xs text-zinc-500">
+            <caption className="px-4 py-3 text-left text-xs font-medium text-zinc-500">
               {caption}
             </caption>
           ) : null}
-          <thead className="border-b border-zinc-200 bg-zinc-50">
+          <thead className="border-b border-zinc-200 bg-zinc-50/80">
             <tr>
               {columns.map((col) => (
                 <th
                   key={String(col.key)}
                   scope="col"
                   className={[
-                    "px-4 py-3 text-left font-medium text-zinc-700",
+                    "px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-600",
                     col.className ?? "",
                   ].join(" ")}
                 >
@@ -55,7 +55,7 @@ export function DataTable<Row extends Record<string, unknown>>({
               rows.map((row, idx) => (
                 <tr
                   key={idx}
-                  className="border-b border-zinc-100 last:border-b-0"
+                  className="border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50/70"
                 >
                   {columns.map((col) => (
                     <td

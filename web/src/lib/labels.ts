@@ -86,3 +86,22 @@ export function labelDataQualityMetric(value: string): string {
   return DATA_QUALITY_METRIC_LABELS[value] ?? value;
 }
 
+export const HERO_BADGES = [
+  "Python Pipeline",
+  "PostgreSQL",
+  "dbt Core",
+  "Gold Layer",
+  "FastAPI",
+  "Next.js",
+] as const;
+
+export const EXECUTIVE_CARD_HELPERS = {
+  total_orders: "Volume total de pedidos no período disponível.",
+  total_revenue: "Receita bruta agregada (itens + frete).",
+  average_ticket: "Receita total dividida pelo total de pedidos.",
+  delivered_orders: "Pedidos entregues (status entregue).",
+  canceled_orders: "Pedidos cancelados (status cancelado).",
+  late_delivery_rate:
+    "Proporção de entregas com atraso entre pedidos entregues.",
+} as const;
+

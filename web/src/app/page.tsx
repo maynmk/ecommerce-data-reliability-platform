@@ -1,6 +1,10 @@
 import { DataTable } from "@/components/DataTable";
-import { MetricCard } from "@/components/MetricCard";
+import { Badge } from "@/components/Badge";
+import { ExecutiveCard } from "@/components/ExecutiveCard";
+import { InfoCard } from "@/components/InfoCard";
 import { Section } from "@/components/Section";
+import { StatusCard } from "@/components/StatusCard";
+import { StepFlow } from "@/components/StepFlow";
 import { apiGet } from "@/lib/api";
 import {
   formatCurrencyBRL,
@@ -14,6 +18,8 @@ import {
   DATA_QUALITY_COLUMN_LABELS,
   DATA_QUALITY_METRIC_LABELS,
   DELIVERY_PERFORMANCE_COLUMN_LABELS,
+  EXECUTIVE_CARD_HELPERS,
+  HERO_BADGES,
   MART_TABLE_LABELS,
   OVERVIEW_COLUMN_LABELS,
   PRODUCT_PERFORMANCE_COLUMN_LABELS,
@@ -32,6 +38,31 @@ import type {
 
 function sum(rows: Array<Record<string, unknown>>, key: string): number {
   return rows.reduce((acc, row) => acc + (toNumber(row[key]) ?? 0), 0);
+}
+
+function truncateId(value: unknown): string {
+  const text = String(value ?? "");
+  if (text.length <= 14) return text;
+  return `${text.slice(0, 8)}…${text.slice(-4)}`;
+}
+
+type Status = "OK" | "Atenção" | "Crítico";
+
+function classifyReliability(value: number, totalOrders: number | null): Status {
+  if (value === 0) return "OK";
+  if (!totalOrders || totalOrders <= 0) return value < 10 ? "Atenção" : "Crítico";
+
+  const ratio = value / totalOrders;
+  if (ratio >= 0.05) return "Crítico";
+  if (ratio >= 0.01) return "Atenção";
+  return "Atenção";
+}
+
+function badgeForRate(rate: number | null): { label: string; tone: "neutral" | "warning" | "danger" } | null {
+  if (rate == null) return null;
+  if (rate >= 0.08) return { label: "Crítico", tone: "danger" };
+  if (rate >= 0.03) return { label: "Atenção", tone: "warning" };
+  return { label: "OK", tone: "neutral" };
 }
 
 export default async function Home() {
@@ -60,54 +91,105 @@ export default async function Home() {
   const latestQualityCheckedAt =
     dataQuality.length > 0 ? (dataQuality[0]?.checked_at ?? null) : null;
 
+  const snapshot = overview.data_quality;
+  const totalOrdersSnapshot = snapshot.find((m) => m.metric_name === "total_orders");
+  const totalOrdersValue = totalOrdersSnapshot ? toNumber(totalOrdersSnapshot.metric_value) : null;
+  const reliabilityKeys = [
+    "orders_without_payment",
+    "orders_without_items",
+    "orders_without_review",
+    "delivered_orders_with_late_delivery",
+    "canceled_orders",
+  ] as const;
+  const reliabilityMetrics = reliabilityKeys
+    .map((key) => ({
+      key,
+      label: DATA_QUALITY_METRIC_LABELS[key] ?? key,
+      value: toNumber(snapshot.find((m) => m.metric_name === key)?.metric_value) ?? 0,
+    }))
+    .map((m) => ({
+      ...m,
+      status: classifyReliability(m.value, totalOrdersValue),
+    }));
+
+  const lateBadge = badgeForRate(lateRate);
+
   return (
     <div className="min-h-screen bg-zinc-50">
       <header className="border-b border-zinc-200 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-6">
-          <h1 className="text-xl font-semibold text-zinc-900">
-            Dashboard de Métricas (Gold)
-          </h1>
-          <p className="text-sm text-zinc-600">
-            Métricas da camada Gold (dbt) consumidas via FastAPI.
-          </p>
+        <div className="mx-auto max-w-6xl px-6 py-10">
+          <div className="flex flex-col gap-4">
+            <div className="space-y-2">
+              <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">
+                Central de Performance e Confiabilidade do E-commerce
+              </h1>
+              <p className="max-w-3xl text-sm leading-6 text-zinc-600 sm:text-base">
+                Monitore vendas, entregas, vendedores, produtos e qualidade dos
+                dados a partir de uma arquitetura analítica com Bronze, Silver e
+                Gold.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {HERO_BADGES.map((b) => (
+                <Badge key={b}>{b}</Badge>
+              ))}
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <ExecutiveCard
+                title="Total de pedidos"
+                value={formatNumber(totalOrders)}
+                description={EXECUTIVE_CARD_HELPERS.total_orders}
+              />
+              <ExecutiveCard
+                title="Receita total"
+                value={formatCurrencyBRL(totalRevenue)}
+                description={EXECUTIVE_CARD_HELPERS.total_revenue}
+              />
+              <ExecutiveCard
+                title="Ticket médio"
+                value={avgTicket === null ? "—" : formatCurrencyBRL(avgTicket)}
+                description={EXECUTIVE_CARD_HELPERS.average_ticket}
+              />
+              <ExecutiveCard
+                title="Pedidos entregues"
+                value={formatNumber(deliveredOrders)}
+                description={EXECUTIVE_CARD_HELPERS.delivered_orders}
+                statusLabel="Operação"
+                statusTone="neutral"
+              />
+              <ExecutiveCard
+                title="Pedidos cancelados"
+                value={formatNumber(canceledOrders)}
+                description={EXECUTIVE_CARD_HELPERS.canceled_orders}
+                statusLabel={canceledOrders === 0 ? "OK" : "Atenção"}
+                statusTone={canceledOrders === 0 ? "success" : "warning"}
+              />
+              <ExecutiveCard
+                title="Taxa de atraso"
+                value={lateRate === null ? "—" : formatPercent(lateRate)}
+                description={EXECUTIVE_CARD_HELPERS.late_delivery_rate}
+                statusLabel={lateBadge?.label}
+                statusTone={lateBadge?.tone ?? "neutral"}
+              />
+            </div>
+
+            <div className="text-xs text-zinc-500">
+              {lastSalesDate ? `Última data de vendas: ${formatDate(lastSalesDate)}.` : null}{" "}
+              {latestQualityCheckedAt
+                ? `Último check de qualidade: ${formatDateTime(latestQualityCheckedAt)}.`
+                : null}
+            </div>
+          </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-6xl space-y-10 px-6 py-10">
         <Section
           title={SECTION_TITLES.overview}
-          description={[
-            lastSalesDate ? `Última data de vendas: ${formatDate(lastSalesDate)}.` : null,
-            latestQualityCheckedAt
-              ? `Último check de qualidade: ${formatDateTime(latestQualityCheckedAt)}.`
-              : null,
-          ]
-            .filter(Boolean)
-            .join(" ")}
+          description="Visão rápida do que está sendo materializado na camada Gold e do último snapshot de qualidade do dado."
         >
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <MetricCard title="Total de pedidos" value={formatNumber(totalOrders)} />
-            <MetricCard title="Receita total" value={formatCurrencyBRL(totalRevenue)} />
-            <MetricCard
-              title="Ticket médio"
-              value={avgTicket === null ? "—" : formatCurrencyBRL(avgTicket)}
-              subtitle="Receita total / total de pedidos"
-            />
-            <MetricCard
-              title="Pedidos entregues"
-              value={formatNumber(deliveredOrders)}
-            />
-            <MetricCard
-              title="Pedidos cancelados"
-              value={formatNumber(canceledOrders)}
-            />
-            <MetricCard
-              title="Taxa de atraso"
-              value={lateRate === null ? "—" : formatPercent(lateRate)}
-              subtitle="Σ late_orders / Σ delivered_orders"
-            />
-          </div>
-
           <div className="grid gap-6 lg:grid-cols-2">
             <DataTable
               caption="Contagem de linhas por tabela (schema gold)"
@@ -127,7 +209,7 @@ export default async function Home() {
             />
 
             <DataTable
-              caption="Central de qualidade dos dados (último snapshot)"
+              caption="Último snapshot de qualidade do dado (schema gold)"
               columns={[
                 {
                   key: "metric_name",
@@ -153,8 +235,59 @@ export default async function Home() {
         </Section>
 
         <Section
+          title="Central de Confiabilidade dos Dados"
+          description="Monitore inconsistências que podem afetar relatórios, dashboards e decisões de negócio."
+        >
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {reliabilityMetrics.map((m) => (
+              <StatusCard
+                key={m.key}
+                title={m.label}
+                value={formatNumber(m.value)}
+                helper={
+                  totalOrdersValue
+                    ? `${formatPercent(m.value / totalOrdersValue)} do total de pedidos (${formatNumber(
+                        totalOrdersValue,
+                      )}).`
+                    : "Comparação por proporção indisponível (total de pedidos não encontrado no snapshot)."
+                }
+                status={m.status}
+              />
+            ))}
+          </div>
+        </Section>
+
+        <Section
+          title="Perguntas que este painel responde"
+          description="Um recorte executivo para orientar análises e priorização."
+        >
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <InfoCard
+              title="Como as vendas evoluem por dia?"
+              description="Acompanhe volume de pedidos, receita, frete, ticket e avaliação ao longo do tempo."
+            />
+            <InfoCard
+              title="Quais estados têm maior atraso?"
+              description="Identifique onde a operação precisa de atenção e onde o prazo tem maior risco."
+            />
+            <InfoCard
+              title="Quais vendedores geram mais receita?"
+              description="Compare performance por receita, itens vendidos, nota média e atraso."
+            />
+            <InfoCard
+              title="Quais categorias vendem melhor?"
+              description="Entenda quais categorias puxam volume, receita e satisfação do cliente."
+            />
+            <InfoCard
+              title="Existem falhas de dados que afetam a análise?"
+              description="Monitore inconsistências que distorcem relatórios, dashboards e decisões."
+            />
+          </div>
+        </Section>
+
+        <Section
           title={SECTION_TITLES.salesDaily}
-          description="Série diária de pedidos, receita, frete, ticket e score médio de review."
+          description="Acompanhe volume de pedidos, receita, frete, ticket médio e avaliação ao longo do tempo."
         >
           <DataTable
             columns={[
@@ -200,14 +333,14 @@ export default async function Home() {
                 render: (r) => (r.average_review_score == null ? "—" : Number(r.average_review_score).toFixed(2)),
               },
             ]}
-            rows={salesDaily.slice(0, 30)}
-            caption="Últimos 30 dias (use o endpoint para mais)."
+            rows={salesDaily.slice(0, 14)}
+            caption="Últimos 14 dias (use o endpoint para mais)."
           />
         </Section>
 
         <Section
           title={SECTION_TITLES.deliveryPerformance}
-          description="Performance de entrega por UF do cliente."
+          description="Identifique estados com maior taxa de atraso e maior tempo médio de entrega."
         >
           <DataTable
             columns={[
@@ -258,13 +391,14 @@ export default async function Home() {
 
         <Section
           title={SECTION_TITLES.sellerPerformance}
-          description="Top vendedores por receita (fonte: gold.mart_seller_performance)."
+          description="Compare vendedores por receita, itens vendidos, nota média e atraso."
         >
           <DataTable
             columns={[
               {
                 key: "seller_id",
                 header: SELLER_PERFORMANCE_COLUMN_LABELS.seller_id,
+                render: (r) => truncateId(r.seller_id),
               },
               {
                 key: "seller_state",
@@ -301,14 +435,14 @@ export default async function Home() {
                 render: (r) => formatPercent(r.late_delivery_rate),
               },
             ]}
-            rows={sellers}
-            caption="Top 50 por receita."
+            rows={sellers.slice(0, 12)}
+            caption="Top 12 por receita."
           />
         </Section>
 
         <Section
           title={SECTION_TITLES.productPerformance}
-          description="Top categorias por receita (fonte: gold.mart_product_performance)."
+          description="Analise categorias com maior volume, receita, frete médio e satisfação dos clientes."
         >
           <DataTable
             columns={[
@@ -347,14 +481,14 @@ export default async function Home() {
                 render: (r) => (r.avg_review_score == null ? "—" : Number(r.avg_review_score).toFixed(2)),
               },
             ]}
-            rows={products}
-            caption="Top 50 por receita."
+            rows={products.slice(0, 12)}
+            caption="Top 12 por receita."
           />
         </Section>
 
         <Section
           title={SECTION_TITLES.dataQualityCenter}
-          description="Histórico recente de métricas de qualidade (fonte: gold.mart_data_quality_summary)."
+          description="Monitore inconsistências que podem distorcer análises e relatórios."
         >
           <DataTable
             columns={[
@@ -376,8 +510,26 @@ export default async function Home() {
                 render: (r) => formatDateTime(r.checked_at),
               },
             ]}
-            rows={dataQuality}
-            caption="Últimas medições (limit=200)."
+            rows={dataQuality.slice(0, 25)}
+            caption="Últimas 25 medições (limit=200)."
+          />
+        </Section>
+
+        <Section
+          title="Arquitetura dos Dados"
+          description="Este dashboard consome somente métricas da camada Gold expostas pela API FastAPI, evitando acesso direto aos dados brutos."
+        >
+          <StepFlow
+            caption="Fluxo de dados (fim a fim)"
+            steps={[
+              "CSV Olist",
+              "Python Pipeline",
+              "Bronze",
+              "dbt Silver",
+              "dbt Gold",
+              "FastAPI",
+              "Dashboard",
+            ]}
           />
         </Section>
       </main>
