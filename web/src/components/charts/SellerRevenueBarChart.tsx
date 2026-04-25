@@ -11,29 +11,17 @@ import {
   YAxis,
 } from "recharts";
 
-import { formatCurrencyBRL, toNumber } from "@/lib/format";
-import type { SellerPerformanceRow } from "@/lib/types";
-
-function shortId(value: string): string {
-  if (value.length <= 14) return value;
-  return `${value.slice(0, 8)}…${value.slice(-4)}`;
-}
+import { formatCurrencyBRL } from "@/lib/format";
 
 export function SellerRevenueBarChart({
-  rows,
-  limit = 10,
+  data,
 }: {
-  rows: SellerPerformanceRow[];
-  limit?: number;
+  data: Array<{
+    seller_label: string;
+    seller_id_trunc: string;
+    total_revenue: number;
+  }>;
 }) {
-  const data = [...rows]
-    .map((r) => ({
-      seller: shortId(String(r.seller_id ?? "")),
-      total_revenue: toNumber(r.total_revenue) ?? 0,
-    }))
-    .sort((a, b) => b.total_revenue - a.total_revenue)
-    .slice(0, limit);
-
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart
@@ -52,7 +40,7 @@ export function SellerRevenueBarChart({
         />
         <YAxis
           type="category"
-          dataKey="seller"
+          dataKey="seller_label"
           tick={{ fill: "#a1a1aa", fontSize: 12 }}
           axisLine={{ stroke: "rgba(34,197,94,0.12)" }}
           tickLine={{ stroke: "rgba(34,197,94,0.12)" }}
@@ -68,10 +56,10 @@ export function SellerRevenueBarChart({
             color: "#e5e7eb",
           }}
           labelStyle={{ color: "#a1a1aa" }}
+          labelFormatter={(label) => String(label)}
         />
         <Bar dataKey="total_revenue" fill="#22c55e" radius={[0, 8, 8, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
 }
-

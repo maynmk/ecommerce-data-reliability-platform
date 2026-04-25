@@ -120,6 +120,39 @@ export default async function Home() {
 
   const lateBadge = badgeForRate(lateRate);
 
+  const sellersSorted = [...sellers].sort(
+    (a, b) => (toNumber(b.total_revenue) ?? 0) - (toNumber(a.total_revenue) ?? 0),
+  );
+
+  const sellerStateCounters = new Map<string, number>();
+  const sellerAliases = new Map<
+    string,
+    { alias: string; seller_id_trunc: string; seller_state: string }
+  >();
+
+  for (const row of sellersSorted) {
+    const state = String(row.seller_state ?? "NA");
+    const count = (sellerStateCounters.get(state) ?? 0) + 1;
+    sellerStateCounters.set(state, count);
+
+    const alias = `Vendedor ${state} #${String(count).padStart(3, "0")}`;
+    sellerAliases.set(String(row.seller_id), {
+      alias,
+      seller_id_trunc: truncateId(row.seller_id),
+      seller_state: state,
+    });
+  }
+
+  const sellersTop10 = sellersSorted.slice(0, 10);
+  const sellerChartData = sellersTop10.map((row) => {
+    const meta = sellerAliases.get(String(row.seller_id));
+    return {
+      seller_label: meta?.alias ?? "Vendedor #???",
+      seller_id_trunc: meta?.seller_id_trunc ?? truncateId(row.seller_id),
+      total_revenue: toNumber(row.total_revenue) ?? 0,
+    };
+  });
+
   const topLateState = [...delivery]
     .map((r) => ({
       state: r.customer_state,
@@ -135,10 +168,7 @@ export default async function Home() {
     .sort((a, b) => b.revenue - a.revenue)[0];
 
   const topSeller = [...sellers]
-    .map((r) => ({
-      seller: r.seller_id,
-      revenue: toNumber(r.total_revenue) ?? 0,
-    }))
+    .map((r) => ({ seller_id: r.seller_id, revenue: toNumber(r.total_revenue) ?? 0 }))
     .sort((a, b) => b.revenue - a.revenue)[0];
 
   const totalQualityIssues = reliabilityMetrics.reduce((acc, m) => acc + m.value, 0);
@@ -234,8 +264,22 @@ export default async function Home() {
           />
           <InsightCard
             title="Vendedor com maior receita"
-            value={topSeller ? truncateId(topSeller.seller) : "—"}
+            value={
+              topSeller
+                ? sellerAliases.get(String(topSeller.seller_id))?.alias ?? "—"
+                : "—"
+            }
             description={topSeller ? formatCurrencyBRL(topSeller.revenue) : "—"}
+            badge={
+              topSeller
+                ? {
+                    label:
+                      sellerAliases.get(String(topSeller.seller_id))?.seller_state ??
+                      "—",
+                    tone: "neutral",
+                  }
+                : undefined
+            }
           />
           <InsightCard
             title="Pedidos com problemas"
@@ -432,14 +476,25 @@ export default async function Home() {
               title="Receita por vendedor (top 10)"
               subtitle="Ranking por receita total."
             >
-              <SellerRevenueBarChart rows={sellers} limit={10} />
+              <SellerRevenueBarChart data={sellerChartData} />
             </ChartCard>
             <DataTable
               columns={[
                 {
                   key: "seller_id",
                   header: SELLER_PERFORMANCE_COLUMN_LABELS.seller_id,
-                  render: (r) => truncateId(r.seller_id),
+                  render: (r) => {
+                    const meta = sellerAliases.get(String(r.seller_id));
+                    const alias = meta?.alias ?? "Vendedor #???";
+                    const title = meta?.seller_id_trunc
+                      ? `seller_id: ${meta.seller_id_trunc}`
+                      : `seller_id: ${truncateId(r.seller_id)}`;
+                    return (
+                      <span title={title} className="whitespace-nowrap">
+                        {alias}
+                      </span>
+                    );
+                  },
                 },
                 {
                   key: "total_revenue",
@@ -463,12 +518,7 @@ export default async function Home() {
                   render: (r) => formatPercent(r.late_delivery_rate),
                 },
               ]}
-              rows={[...sellers]
-                .sort(
-                  (a, b) =>
-                    (toNumber(b.total_revenue) ?? 0) - (toNumber(a.total_revenue) ?? 0),
-                )
-                .slice(0, 10)}
+              rows={sellersTop10}
               caption="Mostrando top 10 registros"
             />
           </div>
