@@ -10,6 +10,7 @@ import { formatNumber } from "@/lib/format";
 import type { DeliveryPerformanceRow, SalesDailyRow } from "@/lib/types";
 
 type ActiveKpi =
+  | "all"
   | "revenue"
   | "orders"
   | "ticket"
@@ -18,16 +19,57 @@ type ActiveKpi =
   | "quality";
 
 const KPI_OPTIONS: OptionPill[] = [
-  { id: "revenue", label: "Receita" },
-  { id: "orders", label: "Pedidos" },
-  { id: "ticket", label: "Ticket médio" },
-  { id: "delivered", label: "Entregas" },
-  { id: "late", label: "Atrasos" },
-  { id: "quality", label: "Qualidade dos dados" },
+  {
+    id: "all",
+    label: "Todos",
+    activeClassName: "border-emerald-500/30 bg-emerald-500/10 text-emerald-100",
+    activeDotClassName: "bg-emerald-300",
+  },
+  {
+    id: "revenue",
+    label: "Receita",
+    activeClassName: "border-green-500/40 bg-green-500/10 text-green-100",
+    activeDotClassName: "bg-green-400",
+  },
+  {
+    id: "orders",
+    label: "Pedidos",
+    activeClassName: "border-sky-500/40 bg-sky-500/10 text-sky-100",
+    activeDotClassName: "bg-sky-400",
+  },
+  {
+    id: "ticket",
+    label: "Ticket médio",
+    activeClassName: "border-cyan-500/40 bg-cyan-500/10 text-cyan-100",
+    activeDotClassName: "bg-cyan-400",
+  },
+  {
+    id: "delivered",
+    label: "Entregas",
+    activeClassName: "border-emerald-500/40 bg-emerald-500/10 text-emerald-100",
+    activeDotClassName: "bg-emerald-400",
+  },
+  {
+    id: "late",
+    label: "Atrasos",
+    activeClassName: "border-amber-500/40 bg-amber-500/10 text-amber-100",
+    activeDotClassName: "bg-amber-400",
+  },
+  {
+    id: "quality",
+    label: "Qualidade dos dados",
+    activeClassName: "border-rose-500/40 bg-rose-500/10 text-rose-100",
+    activeDotClassName: "bg-rose-400",
+  },
 ];
 
 function chartMeta(active: ActiveKpi): { title: string; subtitle: string } {
   switch (active) {
+    case "all":
+      return {
+        title: "Visão geral por mês",
+        subtitle: "Receita e pedidos por mês (últimos 12 meses).",
+      };
     case "orders":
       return {
         title: "Pedidos por mês",
@@ -63,6 +105,7 @@ function chartMeta(active: ActiveKpi): { title: string; subtitle: string } {
 }
 
 function toSalesMode(active: ActiveKpi): SalesKpiMode | null {
+  if (active === "all") return "dual";
   if (active === "revenue") return "revenue";
   if (active === "orders") return "orders";
   if (active === "ticket") return "ticket";
@@ -79,7 +122,7 @@ export function OperationalKpiPanel({
   deliveryRows: DeliveryPerformanceRow[];
   totalQualityIssues: number;
 }) {
-  const [active, setActive] = React.useState<ActiveKpi>("revenue");
+  const [active, setActive] = React.useState<ActiveKpi>("all");
 
   const onChange = (id: string) => {
     const next = id as ActiveKpi;
@@ -144,4 +187,3 @@ export function OperationalKpiPanel({
     </div>
   );
 }
-

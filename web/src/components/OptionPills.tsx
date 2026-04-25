@@ -3,6 +3,8 @@ import * as React from "react";
 export type OptionPill = {
   id: string;
   label: string;
+  activeClassName?: string;
+  activeDotClassName?: string;
 };
 
 export function OptionPills({
@@ -29,18 +31,19 @@ export function OptionPills({
               onClick={() => onChange(opt.id)}
               aria-pressed={active}
               className={[
-                "flex cursor-pointer items-center justify-between rounded-xl border px-3 py-2 text-sm outline-none transition-colors",
-                "focus:border-emerald-500/35 focus:ring-2 focus:ring-emerald-500/10",
+                "relative flex cursor-pointer items-center justify-between rounded-xl border px-3 py-2.5 text-sm outline-none transition-colors",
+                "focus:ring-2 focus:ring-emerald-500/10",
                 active
-                  ? "border-emerald-500/35 bg-emerald-500/10 text-emerald-100"
-                  : "border-emerald-500/10 bg-zinc-950/20 text-zinc-200",
+                  ? (opt.activeClassName ??
+                      "border-emerald-500/35 bg-emerald-500/10 text-emerald-100")
+                  : "border-emerald-500/10 bg-zinc-950/20 text-zinc-200 hover:border-emerald-500/20 hover:bg-emerald-500/5",
               ].join(" ")}
             >
               <span className="font-medium">{opt.label}</span>
               <span
                 className={[
-                  "h-2.5 w-2.5 rounded-full",
-                  active ? "bg-emerald-400" : "bg-zinc-600",
+                  "absolute right-2 top-2 h-2.5 w-2.5 rounded-full",
+                  active ? (opt.activeDotClassName ?? "bg-emerald-400") : "bg-zinc-600",
                 ].join(" ")}
                 aria-hidden="true"
               />
