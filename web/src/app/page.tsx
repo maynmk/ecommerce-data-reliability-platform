@@ -1,10 +1,15 @@
 import { DataTable } from "@/components/DataTable";
 import { Badge } from "@/components/Badge";
+import { Shell } from "@/components/Shell";
 import { ExecutiveCard } from "@/components/ExecutiveCard";
 import { InfoCard } from "@/components/InfoCard";
 import { Section } from "@/components/Section";
 import { StatusCard } from "@/components/StatusCard";
 import { StepFlow } from "@/components/StepFlow";
+import { ChartCard } from "@/components/charts/ChartCard";
+import { DeliveryStateBarChart } from "@/components/charts/DeliveryStateBarChart";
+import { ProductCategoryBarChart } from "@/components/charts/ProductCategoryBarChart";
+import { SalesDailyLineChart } from "@/components/charts/SalesDailyLineChart";
 import { apiGet } from "@/lib/api";
 import {
   formatCurrencyBRL,
@@ -115,77 +120,80 @@ export default async function Home() {
   const lateBadge = badgeForRate(lateRate);
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <header className="border-b border-zinc-200 bg-white">
-        <div className="mx-auto max-w-6xl px-6 py-10">
-          <div className="flex flex-col gap-4">
-            <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">
-                Central de Performance e Confiabilidade do E-commerce
-              </h1>
-              <p className="max-w-3xl text-sm leading-6 text-zinc-600 sm:text-base">
-                Monitore vendas, entregas, vendedores, produtos e qualidade dos
-                dados a partir de uma arquitetura analítica com Bronze, Silver e
-                Gold.
-              </p>
+    <Shell
+      title="Central de Performance e Confiabilidade do E-commerce"
+      subtitle="Monitore vendas, entregas, vendedores, produtos e qualidade dos dados a partir de uma arquitetura analítica com Bronze, Silver e Gold."
+      badges={HERO_BADGES}
+      nav={[
+        { id: "visao-geral", label: "Visão geral" },
+        { id: "vendas", label: "Vendas" },
+        { id: "entregas", label: "Entregas" },
+        { id: "vendedores", label: "Vendedores" },
+        { id: "produtos", label: "Produtos" },
+        { id: "qualidade", label: "Qualidade dos dados" },
+      ]}
+    >
+      <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-2">
+            <div className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              Resumo executivo
             </div>
-
-            <div className="flex flex-wrap gap-2">
-              {HERO_BADGES.map((b) => (
-                <Badge key={b}>{b}</Badge>
-              ))}
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <ExecutiveCard
-                title="Total de pedidos"
-                value={formatNumber(totalOrders)}
-                description={EXECUTIVE_CARD_HELPERS.total_orders}
-              />
-              <ExecutiveCard
-                title="Receita total"
-                value={formatCurrencyBRL(totalRevenue)}
-                description={EXECUTIVE_CARD_HELPERS.total_revenue}
-              />
-              <ExecutiveCard
-                title="Ticket médio"
-                value={avgTicket === null ? "—" : formatCurrencyBRL(avgTicket)}
-                description={EXECUTIVE_CARD_HELPERS.average_ticket}
-              />
-              <ExecutiveCard
-                title="Pedidos entregues"
-                value={formatNumber(deliveredOrders)}
-                description={EXECUTIVE_CARD_HELPERS.delivered_orders}
-                statusLabel="Operação"
-                statusTone="neutral"
-              />
-              <ExecutiveCard
-                title="Pedidos cancelados"
-                value={formatNumber(canceledOrders)}
-                description={EXECUTIVE_CARD_HELPERS.canceled_orders}
-                statusLabel={canceledOrders === 0 ? "OK" : "Atenção"}
-                statusTone={canceledOrders === 0 ? "success" : "warning"}
-              />
-              <ExecutiveCard
-                title="Taxa de atraso"
-                value={lateRate === null ? "—" : formatPercent(lateRate)}
-                description={EXECUTIVE_CARD_HELPERS.late_delivery_rate}
-                statusLabel={lateBadge?.label}
-                statusTone={lateBadge?.tone ?? "neutral"}
-              />
-            </div>
-
-            <div className="text-xs text-zinc-500">
+            <div className="text-sm text-zinc-600">
               {lastSalesDate ? `Última data de vendas: ${formatDate(lastSalesDate)}.` : null}{" "}
               {latestQualityCheckedAt
                 ? `Último check de qualidade: ${formatDateTime(latestQualityCheckedAt)}.`
                 : null}
             </div>
           </div>
+          <div className="flex flex-wrap gap-2 md:hidden">
+            {HERO_BADGES.slice(0, 6).map((b) => (
+              <Badge key={b}>{b}</Badge>
+            ))}
+          </div>
         </div>
-      </header>
 
-      <main className="mx-auto max-w-6xl space-y-10 px-6 py-10">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ExecutiveCard
+            title="Total de pedidos"
+            value={formatNumber(totalOrders)}
+            description={EXECUTIVE_CARD_HELPERS.total_orders}
+          />
+          <ExecutiveCard
+            title="Receita total"
+            value={formatCurrencyBRL(totalRevenue)}
+            description={EXECUTIVE_CARD_HELPERS.total_revenue}
+          />
+          <ExecutiveCard
+            title="Ticket médio"
+            value={avgTicket === null ? "—" : formatCurrencyBRL(avgTicket)}
+            description={EXECUTIVE_CARD_HELPERS.average_ticket}
+          />
+          <ExecutiveCard
+            title="Pedidos entregues"
+            value={formatNumber(deliveredOrders)}
+            description={EXECUTIVE_CARD_HELPERS.delivered_orders}
+            statusLabel="Operação"
+            statusTone="neutral"
+          />
+          <ExecutiveCard
+            title="Pedidos cancelados"
+            value={formatNumber(canceledOrders)}
+            description={EXECUTIVE_CARD_HELPERS.canceled_orders}
+            statusLabel={canceledOrders === 0 ? "OK" : "Atenção"}
+            statusTone={canceledOrders === 0 ? "success" : "warning"}
+          />
+          <ExecutiveCard
+            title="Taxa de atraso"
+            value={lateRate === null ? "—" : formatPercent(lateRate)}
+            description={EXECUTIVE_CARD_HELPERS.late_delivery_rate}
+            statusLabel={lateBadge?.label}
+            statusTone={lateBadge?.tone ?? "neutral"}
+          />
+        </div>
+      </div>
+
+      <div id="visao-geral" className="scroll-mt-28">
         <Section
           title={SECTION_TITLES.overview}
           description="Visão rápida do que está sendo materializado na camada Gold e do último snapshot de qualidade do dado."
@@ -233,7 +241,9 @@ export default async function Home() {
             />
           </div>
         </Section>
+      </div>
 
+      <div id="qualidade" className="scroll-mt-28">
         <Section
           title="Central de Confiabilidade dos Dados"
           description="Monitore inconsistências que podem afetar relatórios, dashboards e decisões de negócio."
@@ -256,11 +266,12 @@ export default async function Home() {
             ))}
           </div>
         </Section>
+      </div>
 
-        <Section
-          title="Perguntas que este painel responde"
-          description="Um recorte executivo para orientar análises e priorização."
-        >
+      <Section
+        title="Perguntas que este painel responde"
+        description="Um recorte executivo para orientar análises e priorização."
+      >
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <InfoCard
               title="Como as vendas evoluem por dia?"
@@ -283,112 +294,101 @@ export default async function Home() {
               description="Monitore inconsistências que distorcem relatórios, dashboards e decisões."
             />
           </div>
-        </Section>
+      </Section>
 
+      <div id="vendas" className="scroll-mt-28">
         <Section
           title={SECTION_TITLES.salesDaily}
           description="Acompanhe volume de pedidos, receita, frete, ticket médio e avaliação ao longo do tempo."
         >
-          <DataTable
-            columns={[
-              {
-                key: "order_date",
-                header: SALES_DAILY_COLUMN_LABELS.order_date,
-                render: (r) => formatDate(r.order_date),
-              },
-              {
-                key: "total_orders",
-                header: SALES_DAILY_COLUMN_LABELS.total_orders,
-                className: "text-right",
-                render: (r) => formatNumber(r.total_orders),
-              },
-              {
-                key: "delivered_orders",
-                header: SALES_DAILY_COLUMN_LABELS.delivered_orders,
-                className: "text-right",
-                render: (r) => formatNumber(r.delivered_orders),
-              },
-              {
-                key: "canceled_orders",
-                header: SALES_DAILY_COLUMN_LABELS.canceled_orders,
-                className: "text-right",
-                render: (r) => formatNumber(r.canceled_orders),
-              },
-              {
-                key: "total_revenue",
-                header: SALES_DAILY_COLUMN_LABELS.total_revenue,
-                className: "text-right",
-                render: (r) => formatCurrencyBRL(r.total_revenue),
-              },
-              {
-                key: "average_ticket",
-                header: SALES_DAILY_COLUMN_LABELS.average_ticket,
-                className: "text-right",
-                render: (r) => formatCurrencyBRL(r.average_ticket),
-              },
-              {
-                key: "average_review_score",
-                header: SALES_DAILY_COLUMN_LABELS.average_review_score,
-                className: "text-right",
-                render: (r) => (r.average_review_score == null ? "—" : Number(r.average_review_score).toFixed(2)),
-              },
-            ]}
-            rows={salesDaily.slice(0, 14)}
-            caption="Últimos 14 dias (use o endpoint para mais)."
-          />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <ChartCard
+              title="Vendas por dia (últimos 30 dias)"
+              subtitle="Pedidos e receita agregados por data."
+            >
+              <SalesDailyLineChart rows={salesDaily} limit={30} />
+            </ChartCard>
+            <DataTable
+              columns={[
+                {
+                  key: "order_date",
+                  header: SALES_DAILY_COLUMN_LABELS.order_date,
+                  render: (r) => formatDate(r.order_date),
+                },
+                {
+                  key: "total_orders",
+                  header: SALES_DAILY_COLUMN_LABELS.total_orders,
+                  className: "text-right tabular-nums",
+                  render: (r) => formatNumber(r.total_orders),
+                },
+                {
+                  key: "total_revenue",
+                  header: SALES_DAILY_COLUMN_LABELS.total_revenue,
+                  className: "text-right tabular-nums",
+                  render: (r) => formatCurrencyBRL(r.total_revenue),
+                },
+                {
+                  key: "average_ticket",
+                  header: SALES_DAILY_COLUMN_LABELS.average_ticket,
+                  className: "text-right tabular-nums",
+                  render: (r) => formatCurrencyBRL(r.average_ticket),
+                },
+              ]}
+              rows={salesDaily.slice(0, 10)}
+              caption="Mostrando os 10 registros mais recentes."
+            />
+          </div>
         </Section>
+      </div>
 
+      <div id="entregas" className="scroll-mt-28">
         <Section
           title={SECTION_TITLES.deliveryPerformance}
           description="Identifique estados com maior taxa de atraso e maior tempo médio de entrega."
         >
-          <DataTable
-            columns={[
-              {
-                key: "customer_state",
-                header: DELIVERY_PERFORMANCE_COLUMN_LABELS.customer_state,
-              },
-              {
-                key: "total_orders",
-                header: DELIVERY_PERFORMANCE_COLUMN_LABELS.total_orders,
-                className: "text-right",
-                render: (r) => formatNumber(r.total_orders),
-              },
-              {
-                key: "delivered_orders",
-                header: DELIVERY_PERFORMANCE_COLUMN_LABELS.delivered_orders,
-                className: "text-right",
-                render: (r) => formatNumber(r.delivered_orders),
-              },
-              {
-                key: "late_orders",
-                header: DELIVERY_PERFORMANCE_COLUMN_LABELS.late_orders,
-                className: "text-right",
-                render: (r) => formatNumber(r.late_orders),
-              },
-              {
-                key: "late_delivery_rate",
-                header: DELIVERY_PERFORMANCE_COLUMN_LABELS.late_delivery_rate,
-                className: "text-right",
-                render: (r) => formatPercent(r.late_delivery_rate),
-              },
-              {
-                key: "avg_delivery_time_days",
-                header: DELIVERY_PERFORMANCE_COLUMN_LABELS.avg_delivery_time_days,
-                className: "text-right",
-                render: (r) => (r.avg_delivery_time_days == null ? "—" : Number(r.avg_delivery_time_days).toFixed(2)),
-              },
-              {
-                key: "avg_delay_days",
-                header: DELIVERY_PERFORMANCE_COLUMN_LABELS.avg_delay_days,
-                className: "text-right",
-                render: (r) => (r.avg_delay_days == null ? "—" : Number(r.avg_delay_days).toFixed(2)),
-              },
-            ]}
-            rows={delivery}
-          />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <ChartCard
+              title="Taxa de atraso por estado (top 10)"
+              subtitle="Ordenado por maior taxa de atraso."
+            >
+              <DeliveryStateBarChart rows={delivery} limit={10} />
+            </ChartCard>
+            <DataTable
+              columns={[
+                {
+                  key: "customer_state",
+                  header: DELIVERY_PERFORMANCE_COLUMN_LABELS.customer_state,
+                },
+                {
+                  key: "late_delivery_rate",
+                  header: DELIVERY_PERFORMANCE_COLUMN_LABELS.late_delivery_rate,
+                  className: "text-right tabular-nums",
+                  render: (r) => formatPercent(r.late_delivery_rate),
+                },
+                {
+                  key: "avg_delivery_time_days",
+                  header: DELIVERY_PERFORMANCE_COLUMN_LABELS.avg_delivery_time_days,
+                  className: "text-right tabular-nums",
+                  render: (r) =>
+                    r.avg_delivery_time_days == null
+                      ? "—"
+                      : Number(r.avg_delivery_time_days).toFixed(2),
+                },
+              ]}
+              rows={[...delivery]
+                .sort(
+                  (a, b) =>
+                    (toNumber(b.late_delivery_rate) ?? 0) -
+                    (toNumber(a.late_delivery_rate) ?? 0),
+                )
+                .slice(0, 10)}
+              caption="Mostrando top 10 estados."
+            />
+          </div>
         </Section>
+      </div>
 
+      <div id="vendedores" className="scroll-mt-28">
         <Section
           title={SECTION_TITLES.sellerPerformance}
           description="Compare vendedores por receita, itens vendidos, nota média e atraso."
@@ -407,89 +407,82 @@ export default async function Home() {
               {
                 key: "total_orders",
                 header: SELLER_PERFORMANCE_COLUMN_LABELS.total_orders,
-                className: "text-right",
+                className: "text-right tabular-nums",
                 render: (r) => formatNumber(r.total_orders),
               },
               {
                 key: "total_revenue",
                 header: SELLER_PERFORMANCE_COLUMN_LABELS.total_revenue,
-                className: "text-right",
+                className: "text-right tabular-nums",
                 render: (r) => formatCurrencyBRL(r.total_revenue),
               },
               {
                 key: "avg_item_price",
                 header: SELLER_PERFORMANCE_COLUMN_LABELS.avg_item_price,
-                className: "text-right",
+                className: "text-right tabular-nums",
                 render: (r) => formatCurrencyBRL(r.avg_item_price),
               },
               {
                 key: "avg_review_score",
                 header: SELLER_PERFORMANCE_COLUMN_LABELS.avg_review_score,
-                className: "text-right",
+                className: "text-right tabular-nums",
                 render: (r) => (r.avg_review_score == null ? "—" : Number(r.avg_review_score).toFixed(2)),
               },
               {
                 key: "late_delivery_rate",
                 header: SELLER_PERFORMANCE_COLUMN_LABELS.late_delivery_rate,
-                className: "text-right",
+                className: "text-right tabular-nums",
                 render: (r) => formatPercent(r.late_delivery_rate),
               },
             ]}
-            rows={sellers.slice(0, 12)}
-            caption="Top 12 por receita."
+            rows={sellers.slice(0, 20)}
+            caption="Mostrando top 20 registros."
           />
         </Section>
+      </div>
 
+      <div id="produtos" className="scroll-mt-28">
         <Section
           title={SECTION_TITLES.productPerformance}
           description="Analise categorias com maior volume, receita, frete médio e satisfação dos clientes."
         >
-          <DataTable
-            columns={[
-              {
-                key: "product_category_name_english",
-                header: PRODUCT_PERFORMANCE_COLUMN_LABELS.product_category_name_english,
-              },
-              {
-                key: "total_orders",
-                header: PRODUCT_PERFORMANCE_COLUMN_LABELS.total_orders,
-                className: "text-right",
-                render: (r) => formatNumber(r.total_orders),
-              },
-              {
-                key: "total_items_sold",
-                header: PRODUCT_PERFORMANCE_COLUMN_LABELS.total_items_sold,
-                className: "text-right",
-                render: (r) => formatNumber(r.total_items_sold),
-              },
-              {
-                key: "total_revenue",
-                header: PRODUCT_PERFORMANCE_COLUMN_LABELS.total_revenue,
-                className: "text-right",
-                render: (r) => formatCurrencyBRL(r.total_revenue),
-              },
-              {
-                key: "avg_item_price",
-                header: PRODUCT_PERFORMANCE_COLUMN_LABELS.avg_item_price,
-                className: "text-right",
-                render: (r) => formatCurrencyBRL(r.avg_item_price),
-              },
-              {
-                key: "avg_review_score",
-                header: PRODUCT_PERFORMANCE_COLUMN_LABELS.avg_review_score,
-                className: "text-right",
-                render: (r) => (r.avg_review_score == null ? "—" : Number(r.avg_review_score).toFixed(2)),
-              },
-            ]}
-            rows={products.slice(0, 12)}
-            caption="Top 12 por receita."
-          />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <ChartCard
+              title="Receita por categoria (top 10)"
+              subtitle="Ordenado por maior receita."
+            >
+              <ProductCategoryBarChart rows={products} limit={10} />
+            </ChartCard>
+            <DataTable
+              columns={[
+                {
+                  key: "product_category_name_english",
+                  header: PRODUCT_PERFORMANCE_COLUMN_LABELS.product_category_name_english,
+                },
+                {
+                  key: "total_revenue",
+                  header: PRODUCT_PERFORMANCE_COLUMN_LABELS.total_revenue,
+                  className: "text-right tabular-nums",
+                  render: (r) => formatCurrencyBRL(r.total_revenue),
+                },
+                {
+                  key: "avg_item_price",
+                  header: PRODUCT_PERFORMANCE_COLUMN_LABELS.avg_item_price,
+                  className: "text-right tabular-nums",
+                  render: (r) => formatCurrencyBRL(r.avg_item_price),
+                },
+              ]}
+              rows={products.slice(0, 10)}
+              caption="Mostrando top 10 categorias."
+            />
+          </div>
         </Section>
+      </div>
 
-        <Section
-          title={SECTION_TITLES.dataQualityCenter}
-          description="Monitore inconsistências que podem distorcer análises e relatórios."
-        >
+      <Section
+        title={SECTION_TITLES.dataQualityCenter}
+        description="Monitore inconsistências que podem distorcer análises e relatórios."
+      >
           <DataTable
             columns={[
               {
@@ -501,7 +494,7 @@ export default async function Home() {
               {
                 key: "metric_value",
                 header: DATA_QUALITY_COLUMN_LABELS.metric_value,
-                className: "text-right",
+                className: "text-right tabular-nums",
                 render: (r) => formatNumber(r.metric_value),
               },
               {
@@ -510,15 +503,15 @@ export default async function Home() {
                 render: (r) => formatDateTime(r.checked_at),
               },
             ]}
-            rows={dataQuality.slice(0, 25)}
-            caption="Últimas 25 medições (limit=200)."
-          />
-        </Section>
+          rows={dataQuality.slice(0, 20)}
+          caption="Mostrando as 20 medições mais recentes (limit=200)."
+        />
+      </Section>
 
-        <Section
-          title="Arquitetura dos Dados"
-          description="Este dashboard consome somente métricas da camada Gold expostas pela API FastAPI, evitando acesso direto aos dados brutos."
-        >
+      <Section
+        title="Arquitetura dos Dados"
+        description="Este dashboard consome somente métricas da camada Gold expostas pela API FastAPI, evitando acesso direto aos dados brutos."
+      >
           <StepFlow
             caption="Fluxo de dados (fim a fim)"
             steps={[
@@ -531,15 +524,7 @@ export default async function Home() {
               "Dashboard",
             ]}
           />
-        </Section>
-      </main>
-
-      <footer className="border-t border-zinc-200 bg-white">
-        <div className="mx-auto max-w-6xl px-6 py-6 text-xs text-zinc-500">
-          Fonte: schema <span className="font-mono">gold</span> via FastAPI • Endpoints{" "}
-          <span className="font-mono">/metrics/*</span>
-        </div>
-      </footer>
-    </div>
+      </Section>
+    </Shell>
   );
 }
