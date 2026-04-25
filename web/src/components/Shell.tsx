@@ -65,9 +65,9 @@ export function Shell({
     panels && panels.length > 0 ? panelMap.get(activeId) : (children ?? null);
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen overflow-x-hidden bg-[var(--background)]">
       <header className="fixed inset-x-0 top-0 z-20 border-b border-emerald-500/15 bg-zinc-950/70 backdrop-blur">
-        <div className="mx-auto max-w-6xl px-6 py-4">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-3">
             <div className="flex items-start justify-between gap-4">
               <div className="flex min-w-0 items-start gap-3">
@@ -171,7 +171,7 @@ export function Shell({
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl space-y-10 px-6 pb-14 pt-32 md:pt-28">
+      <main className="mx-auto w-full max-w-[1600px] space-y-8 px-4 pb-12 pt-32 sm:px-6 lg:px-8 md:pt-28">
         {top ? <div className="space-y-6">{top}</div> : null}
         <div
           id={`panel-${activeId}`}
@@ -183,7 +183,7 @@ export function Shell({
       </main>
 
       <footer className="border-t border-emerald-500/10 bg-zinc-950/40">
-        <div className="mx-auto max-w-6xl px-6 py-8 text-xs text-zinc-400">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-6 text-xs text-zinc-400 sm:px-6 lg:px-8">
           Fonte: schema <span className="font-mono text-zinc-200">gold</span> via
           FastAPI • Endpoints{" "}
           <span className="font-mono text-zinc-200">/metrics/*</span>

@@ -333,7 +333,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
             </div>
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
             <ExecutiveCard
               title="Total de pedidos"
               value={formatNumber(totalOrders)}
@@ -377,7 +377,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
         {
           id: "overview",
           content: (
-            <div className="space-y-6">
+            <div className="space-y-5">
               <div className="grid gap-4 lg:grid-cols-12">
                 <div className="lg:col-span-8">
                   <ChartCard
