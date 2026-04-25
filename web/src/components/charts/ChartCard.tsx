@@ -26,7 +26,7 @@ export function ChartCard({
           <div className="text-xs leading-5 text-zinc-300">{subtitle}</div>
         ) : null}
       </div>
-      <div className={["mt-4 min-h-56 flex-1", bodyClassName ?? ""].join(" ")}>
+      <div className={["mt-4 min-h-[14rem] flex-1", bodyClassName ?? ""].join(" ")}>
         {children}
       </div>
     </div>

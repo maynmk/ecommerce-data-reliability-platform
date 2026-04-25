@@ -2,7 +2,7 @@ import { Badge } from "@/components/Badge";
 import { DataTable } from "@/components/DataTable";
 import { ExecutiveCard } from "@/components/ExecutiveCard";
 import { InsightCard } from "@/components/InsightCard";
-import { OptionPills } from "@/components/OptionPills";
+import { OperationalKpiPanel } from "@/components/OperationalKpiPanel";
 import { QualityList } from "@/components/QualityList";
 import { Section } from "@/components/Section";
 import { ShellWithDrawer } from "@/components/ShellWithDrawer";
@@ -378,38 +378,11 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
           id: "overview",
           content: (
             <div className="space-y-5">
-              <div className="grid items-stretch gap-4 lg:grid-cols-12">
-                <div className="lg:col-span-8">
-                  <ChartCard
-                    title="Receita por mês"
-                    subtitle="Agregado no frontend a partir dos dados diários (últimos 12 meses)."
-                    className="min-h-[420px]"
-                  >
-                    <SalesDailyLineChart rows={salesDailyFiltered} limit={12} />
-                  </ChartCard>
-                </div>
-                <div className="grid gap-4 lg:col-span-4 lg:h-full lg:grid-rows-2">
-                  <ChartCard
-                    title="Performance por Estado"
-                    subtitle="Top 10 estados por taxa de atraso."
-                    className="min-h-[200px]"
-                  >
-                    <DeliveryStateBarChart rows={deliveryForInsights} limit={10} />
-                  </ChartCard>
-                  <OptionPills
-                    title="KPIs Operacionais"
-                    options={[
-                      "Receita",
-                      "Pedidos",
-                      "Ticket médio",
-                      "Entregas",
-                      "Atrasos",
-                      "Qualidade dos dados",
-                    ]}
-                    activeIndex={0}
-                  />
-                </div>
-              </div>
+              <OperationalKpiPanel
+                salesDailyRows={salesDailyFiltered}
+                deliveryRows={deliveryForInsights}
+                totalQualityIssues={totalQualityIssues}
+              />
 
               <Section
                 title="Insights executivos"
@@ -481,7 +454,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                     <ProductCategoryBarChart rows={productsForInsights} limit={10} />
                   </ChartCard>
                 </div>
-                <div className="lg:col-span-4 min-h-[320px]">
+                <div id="quality-center" className="lg:col-span-4 min-h-[320px]">
                   <QualityList
                     items={reliabilityMetrics.map((m) => ({
                       title: m.label,
