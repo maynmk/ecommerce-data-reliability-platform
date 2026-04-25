@@ -18,7 +18,7 @@ export function ExecutiveCard({
   statusTone?: StatusTone;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-zinc-950/40 p-4 shadow-sm">
+    <div className="relative overflow-hidden rounded-2xl border border-emerald-500/25 bg-gradient-to-b from-emerald-500/10 via-zinc-950/40 to-zinc-950/30 p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
@@ -30,6 +30,7 @@ export function ExecutiveCard({
         </div>
         {statusLabel ? <Badge tone={statusTone}>{statusLabel}</Badge> : null}
       </div>
+      <div className="mt-3 h-px w-full bg-emerald-500/15" />
       <div className="mt-3 text-sm leading-6 text-zinc-300">{description}</div>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-500/25 to-emerald-500/0" />
     </div>

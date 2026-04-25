@@ -20,8 +20,8 @@ export function Shell({
   panels,
   children,
 }: {
-  title: string;
-  subtitle: string;
+  title: React.ReactNode;
+  subtitle: React.ReactNode;
   badges: readonly string[];
   nav: readonly NavItem[];
   top?: React.ReactNode;
@@ -66,11 +66,31 @@ export function Shell({
         <div className="mx-auto max-w-6xl px-6 py-4">
           <div className="flex flex-col gap-3">
             <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0 space-y-1">
-                <div className="text-base font-semibold text-zinc-50">
-                  {title}
+              <div className="flex min-w-0 items-start gap-3">
+                <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-200">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="18"
+                    height="18"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M4 4h16v4H4V4Zm0 6h10v4H4v-4Zm0 6h16v4H4v-4Z"
+                    />
+                  </svg>
                 </div>
-                <div className="text-sm leading-6 text-zinc-300">{subtitle}</div>
+                <div className="min-w-0 space-y-1">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-zinc-300">
+                    Bem-vindo à
+                  </div>
+                  <div className="text-base font-semibold leading-tight text-zinc-50">
+                    {title}
+                  </div>
+                  <div className="hidden text-sm leading-6 text-zinc-300 md:block">
+                    {subtitle}
+                  </div>
+                </div>
               </div>
               <div className="shrink-0 items-center gap-2 flex">
                 <div className="hidden flex-wrap items-center justify-end gap-2 lg:flex">
@@ -96,7 +116,7 @@ export function Shell({
                       />
                     </svg>
                   </span>
-                  Filtros
+                  Filtro
                 </button>
               </div>
             </div>
