@@ -97,3 +97,21 @@ Para rodar apenas Gold com esse mesmo atalho:
 & $DbtExe run --project-dir dbt --profiles-dir dbt --select gold
 & $DbtExe test --project-dir dbt --profiles-dir dbt --select gold
 ```
+
+## API (FastAPI)
+
+A API expõe métricas analíticas consultando apenas as tabelas do schema `gold` (marts):
+
+- `GET /health`
+- `GET /metrics/overview`
+- `GET /metrics/sales-daily`
+- `GET /metrics/delivery-performance`
+- `GET /metrics/seller-performance`
+- `GET /metrics/product-performance`
+- `GET /metrics/data-quality`
+
+Para rodar localmente (a partir da raiz do repo), com as variáveis do `.env`:
+
+```bash
+uvicorn api.app.main:app --reload --port 8000
+```
