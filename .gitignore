@@ -30,3 +30,10 @@ dbt/profiles.yml
 dbt/target/
 dbt/dbt_packages/
 dbt/.user.yml
+# dbt generated files
+dbt/target/
+dbt/logs/
+dbt/.user.yml
+
+# dbt local profile
+dbt/profiles.yml
