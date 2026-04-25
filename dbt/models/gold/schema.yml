@@ -162,11 +162,15 @@ models:
   - name: fct_reviews
     description: "Fato de reviews do pedido."
     columns:
+      - name: review_key
+        description: "Chave hash (md5) do grão review_id + order_id."
+        tests:
+          - not_null
+          - unique
       - name: review_id
         description: "Identificador do review."
         tests:
           - not_null
-          - unique
       - name: order_id
         description: "Identificador do pedido avaliado."
         tests:

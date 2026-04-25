@@ -2,6 +2,7 @@
 
 with reviews as (
     select
+        md5(coalesce(review_id, '') || '|' || coalesce(order_id, '')) as review_key,
         review_id,
         order_id,
         review_score,
