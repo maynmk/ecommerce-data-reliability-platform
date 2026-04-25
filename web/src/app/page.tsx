@@ -10,6 +10,17 @@ import {
   formatPercent,
   toNumber,
 } from "@/lib/format";
+import {
+  DATA_QUALITY_COLUMN_LABELS,
+  DATA_QUALITY_METRIC_LABELS,
+  DELIVERY_PERFORMANCE_COLUMN_LABELS,
+  MART_TABLE_LABELS,
+  OVERVIEW_COLUMN_LABELS,
+  PRODUCT_PERFORMANCE_COLUMN_LABELS,
+  SALES_DAILY_COLUMN_LABELS,
+  SECTION_TITLES,
+  SELLER_PERFORMANCE_COLUMN_LABELS,
+} from "@/lib/labels";
 import type {
   DataQualityRow,
   DeliveryPerformanceRow,
@@ -64,7 +75,7 @@ export default async function Home() {
 
       <main className="mx-auto max-w-6xl space-y-10 px-6 py-10">
         <Section
-          title="Visão geral"
+          title={SECTION_TITLES.overview}
           description={[
             lastSalesDate ? `Última data de vendas: ${formatDate(lastSalesDate)}.` : null,
             latestQualityCheckedAt
@@ -99,32 +110,40 @@ export default async function Home() {
 
           <div className="grid gap-6 lg:grid-cols-2">
             <DataTable
-              caption="Row count por mart (schema gold)"
+              caption="Contagem de linhas por tabela (schema gold)"
               columns={[
-                { key: "table_name", header: "Tabela" },
+                { key: "table_name", header: OVERVIEW_COLUMN_LABELS.table_name },
                 {
                   key: "row_count",
-                  header: "Linhas",
+                  header: OVERVIEW_COLUMN_LABELS.row_count,
                   className: "text-right",
                   render: (r) => formatNumber(r.row_count),
                 },
               ]}
-              rows={overview.tables}
+              rows={overview.tables.map((row) => ({
+                ...row,
+                table_name: MART_TABLE_LABELS[row.table_name] ?? row.table_name,
+              }))}
             />
 
             <DataTable
-              caption="Data Quality Center (último snapshot)"
+              caption="Central de qualidade dos dados (último snapshot)"
               columns={[
-                { key: "metric_name", header: "Métrica" },
+                {
+                  key: "metric_name",
+                  header: DATA_QUALITY_COLUMN_LABELS.metric_name,
+                  render: (r) =>
+                    DATA_QUALITY_METRIC_LABELS[r.metric_name] ?? r.metric_name,
+                },
                 {
                   key: "metric_value",
-                  header: "Valor",
+                  header: DATA_QUALITY_COLUMN_LABELS.metric_value,
                   className: "text-right",
                   render: (r) => formatNumber(r.metric_value),
                 },
                 {
                   key: "checked_at",
-                  header: "Checked at",
+                  header: DATA_QUALITY_COLUMN_LABELS.checked_at,
                   render: (r) => formatDateTime(r.checked_at),
                 },
               ]}
@@ -134,45 +153,49 @@ export default async function Home() {
         </Section>
 
         <Section
-          title="Vendas diárias"
+          title={SECTION_TITLES.salesDaily}
           description="Série diária de pedidos, receita, frete, ticket e score médio de review."
         >
           <DataTable
             columns={[
-              { key: "order_date", header: "Data", render: (r) => formatDate(r.order_date) },
+              {
+                key: "order_date",
+                header: SALES_DAILY_COLUMN_LABELS.order_date,
+                render: (r) => formatDate(r.order_date),
+              },
               {
                 key: "total_orders",
-                header: "Pedidos",
+                header: SALES_DAILY_COLUMN_LABELS.total_orders,
                 className: "text-right",
                 render: (r) => formatNumber(r.total_orders),
               },
               {
                 key: "delivered_orders",
-                header: "Entregues",
+                header: SALES_DAILY_COLUMN_LABELS.delivered_orders,
                 className: "text-right",
                 render: (r) => formatNumber(r.delivered_orders),
               },
               {
                 key: "canceled_orders",
-                header: "Cancelados",
+                header: SALES_DAILY_COLUMN_LABELS.canceled_orders,
                 className: "text-right",
                 render: (r) => formatNumber(r.canceled_orders),
               },
               {
                 key: "total_revenue",
-                header: "Receita",
+                header: SALES_DAILY_COLUMN_LABELS.total_revenue,
                 className: "text-right",
                 render: (r) => formatCurrencyBRL(r.total_revenue),
               },
               {
                 key: "average_ticket",
-                header: "Ticket",
+                header: SALES_DAILY_COLUMN_LABELS.average_ticket,
                 className: "text-right",
                 render: (r) => formatCurrencyBRL(r.average_ticket),
               },
               {
                 key: "average_review_score",
-                header: "Review",
+                header: SALES_DAILY_COLUMN_LABELS.average_review_score,
                 className: "text-right",
                 render: (r) => (r.average_review_score == null ? "—" : Number(r.average_review_score).toFixed(2)),
               },
@@ -183,45 +206,48 @@ export default async function Home() {
         </Section>
 
         <Section
-          title="Performance de entrega"
+          title={SECTION_TITLES.deliveryPerformance}
           description="Performance de entrega por UF do cliente."
         >
           <DataTable
             columns={[
-              { key: "customer_state", header: "UF" },
+              {
+                key: "customer_state",
+                header: DELIVERY_PERFORMANCE_COLUMN_LABELS.customer_state,
+              },
               {
                 key: "total_orders",
-                header: "Pedidos",
+                header: DELIVERY_PERFORMANCE_COLUMN_LABELS.total_orders,
                 className: "text-right",
                 render: (r) => formatNumber(r.total_orders),
               },
               {
                 key: "delivered_orders",
-                header: "Entregues",
+                header: DELIVERY_PERFORMANCE_COLUMN_LABELS.delivered_orders,
                 className: "text-right",
                 render: (r) => formatNumber(r.delivered_orders),
               },
               {
                 key: "late_orders",
-                header: "Atrasados",
+                header: DELIVERY_PERFORMANCE_COLUMN_LABELS.late_orders,
                 className: "text-right",
                 render: (r) => formatNumber(r.late_orders),
               },
               {
                 key: "late_delivery_rate",
-                header: "Taxa atraso",
+                header: DELIVERY_PERFORMANCE_COLUMN_LABELS.late_delivery_rate,
                 className: "text-right",
                 render: (r) => formatPercent(r.late_delivery_rate),
               },
               {
                 key: "avg_delivery_time_days",
-                header: "Avg dias",
+                header: DELIVERY_PERFORMANCE_COLUMN_LABELS.avg_delivery_time_days,
                 className: "text-right",
                 render: (r) => (r.avg_delivery_time_days == null ? "—" : Number(r.avg_delivery_time_days).toFixed(2)),
               },
               {
                 key: "avg_delay_days",
-                header: "Avg delay",
+                header: DELIVERY_PERFORMANCE_COLUMN_LABELS.avg_delay_days,
                 className: "text-right",
                 render: (r) => (r.avg_delay_days == null ? "—" : Number(r.avg_delay_days).toFixed(2)),
               },
@@ -231,40 +257,46 @@ export default async function Home() {
         </Section>
 
         <Section
-          title="Performance de sellers"
-          description="Top vendedores por receita (gold.mart_seller_performance)."
+          title={SECTION_TITLES.sellerPerformance}
+          description="Top vendedores por receita (fonte: gold.mart_seller_performance)."
         >
           <DataTable
             columns={[
-              { key: "seller_id", header: "Seller" },
-              { key: "seller_state", header: "UF" },
+              {
+                key: "seller_id",
+                header: SELLER_PERFORMANCE_COLUMN_LABELS.seller_id,
+              },
+              {
+                key: "seller_state",
+                header: SELLER_PERFORMANCE_COLUMN_LABELS.seller_state,
+              },
               {
                 key: "total_orders",
-                header: "Pedidos",
+                header: SELLER_PERFORMANCE_COLUMN_LABELS.total_orders,
                 className: "text-right",
                 render: (r) => formatNumber(r.total_orders),
               },
               {
                 key: "total_revenue",
-                header: "Receita",
+                header: SELLER_PERFORMANCE_COLUMN_LABELS.total_revenue,
                 className: "text-right",
                 render: (r) => formatCurrencyBRL(r.total_revenue),
               },
               {
                 key: "avg_item_price",
-                header: "Preço médio",
+                header: SELLER_PERFORMANCE_COLUMN_LABELS.avg_item_price,
                 className: "text-right",
                 render: (r) => formatCurrencyBRL(r.avg_item_price),
               },
               {
                 key: "avg_review_score",
-                header: "Review",
+                header: SELLER_PERFORMANCE_COLUMN_LABELS.avg_review_score,
                 className: "text-right",
                 render: (r) => (r.avg_review_score == null ? "—" : Number(r.avg_review_score).toFixed(2)),
               },
               {
                 key: "late_delivery_rate",
-                header: "Atraso",
+                header: SELLER_PERFORMANCE_COLUMN_LABELS.late_delivery_rate,
                 className: "text-right",
                 render: (r) => formatPercent(r.late_delivery_rate),
               },
@@ -275,39 +307,42 @@ export default async function Home() {
         </Section>
 
         <Section
-          title="Performance de produtos"
-          description="Top categorias por receita (gold.mart_product_performance)."
+          title={SECTION_TITLES.productPerformance}
+          description="Top categorias por receita (fonte: gold.mart_product_performance)."
         >
           <DataTable
             columns={[
-              { key: "product_category_name_english", header: "Categoria" },
+              {
+                key: "product_category_name_english",
+                header: PRODUCT_PERFORMANCE_COLUMN_LABELS.product_category_name_english,
+              },
               {
                 key: "total_orders",
-                header: "Pedidos",
+                header: PRODUCT_PERFORMANCE_COLUMN_LABELS.total_orders,
                 className: "text-right",
                 render: (r) => formatNumber(r.total_orders),
               },
               {
                 key: "total_items_sold",
-                header: "Itens",
+                header: PRODUCT_PERFORMANCE_COLUMN_LABELS.total_items_sold,
                 className: "text-right",
                 render: (r) => formatNumber(r.total_items_sold),
               },
               {
                 key: "total_revenue",
-                header: "Receita",
+                header: PRODUCT_PERFORMANCE_COLUMN_LABELS.total_revenue,
                 className: "text-right",
                 render: (r) => formatCurrencyBRL(r.total_revenue),
               },
               {
                 key: "avg_item_price",
-                header: "Preço médio",
+                header: PRODUCT_PERFORMANCE_COLUMN_LABELS.avg_item_price,
                 className: "text-right",
                 render: (r) => formatCurrencyBRL(r.avg_item_price),
               },
               {
                 key: "avg_review_score",
-                header: "Review",
+                header: PRODUCT_PERFORMANCE_COLUMN_LABELS.avg_review_score,
                 className: "text-right",
                 render: (r) => (r.avg_review_score == null ? "—" : Number(r.avg_review_score).toFixed(2)),
               },
@@ -318,21 +353,26 @@ export default async function Home() {
         </Section>
 
         <Section
-          title="Central de qualidade de dados"
-          description="Histórico recente de métricas de qualidade (gold.mart_data_quality_summary)."
+          title={SECTION_TITLES.dataQualityCenter}
+          description="Histórico recente de métricas de qualidade (fonte: gold.mart_data_quality_summary)."
         >
           <DataTable
             columns={[
-              { key: "metric_name", header: "Métrica" },
+              {
+                key: "metric_name",
+                header: DATA_QUALITY_COLUMN_LABELS.metric_name,
+                render: (r) =>
+                  DATA_QUALITY_METRIC_LABELS[r.metric_name] ?? r.metric_name,
+              },
               {
                 key: "metric_value",
-                header: "Valor",
+                header: DATA_QUALITY_COLUMN_LABELS.metric_value,
                 className: "text-right",
                 render: (r) => formatNumber(r.metric_value),
               },
               {
                 key: "checked_at",
-                header: "Checked at",
+                header: DATA_QUALITY_COLUMN_LABELS.checked_at,
                 render: (r) => formatDateTime(r.checked_at),
               },
             ]}
