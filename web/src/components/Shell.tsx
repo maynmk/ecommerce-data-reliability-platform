@@ -18,6 +18,8 @@ export function Shell({
   nav,
   top,
   panels,
+  onFilterClick,
+  filterCount,
   children,
 }: {
   title: React.ReactNode;
@@ -26,6 +28,8 @@ export function Shell({
   nav: readonly NavItem[];
   top?: React.ReactNode;
   panels?: ReadonlyArray<{ id: string; content: React.ReactNode }>;
+  onFilterClick?: (() => void) | undefined;
+  filterCount?: number | undefined;
   children?: React.ReactNode;
 }) {
   const tabs = useMemo(() => nav.map((n) => n.id), [nav]);
@@ -101,6 +105,8 @@ export function Shell({
                 <button
                   type="button"
                   className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-emerald-200 hover:border-emerald-500/40 hover:bg-emerald-500/15"
+                  onClick={onFilterClick}
+                  aria-haspopup="dialog"
                 >
                   <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10">
                     <svg
@@ -116,7 +122,12 @@ export function Shell({
                       />
                     </svg>
                   </span>
-                  Filtro
+                  <span>Filtro</span>
+                  {filterCount && filterCount > 0 ? (
+                    <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10 px-1 text-[10px] font-bold text-emerald-200">
+                      {filterCount}
+                    </span>
+                  ) : null}
                 </button>
               </div>
             </div>

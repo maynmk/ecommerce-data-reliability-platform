@@ -5,7 +5,7 @@ import { InsightCard } from "@/components/InsightCard";
 import { OptionPills } from "@/components/OptionPills";
 import { QualityList } from "@/components/QualityList";
 import { Section } from "@/components/Section";
-import { Shell } from "@/components/Shell";
+import { ShellWithDrawer } from "@/components/ShellWithDrawer";
 import { StatusCard } from "@/components/StatusCard";
 import { StepFlow } from "@/components/StepFlow";
 import { ChartCard } from "@/components/charts/ChartCard";
@@ -13,6 +13,12 @@ import { DeliveryStateBarChart } from "@/components/charts/DeliveryStateBarChart
 import { ProductCategoryBarChart } from "@/components/charts/ProductCategoryBarChart";
 import { SalesDailyLineChart } from "@/components/charts/SalesDailyLineChart";
 import { SellerRevenueBarChart } from "@/components/charts/SellerRevenueBarChart";
+import { ActiveFilterChips } from "@/components/filters/ActiveFilterChips";
+import {
+  FiltersPanel,
+  type SellerOption,
+  type StatusOption,
+} from "@/components/filters/FiltersPanel";
 import { apiGet } from "@/lib/api";
 import {
   DATA_QUALITY_COLUMN_LABELS,
@@ -43,6 +49,15 @@ import type {
   SalesDailyRow,
   SellerPerformanceRow,
 } from "@/lib/types";
+
+type SearchParams = Record<string, string | string[] | undefined>;
+
+function getParam(searchParams: SearchParams | undefined, key: string): string | null {
+  const value = searchParams?.[key];
+  if (!value) return null;
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value;
+}
 
 function sum(rows: Array<Record<string, unknown>>, key: string): number {
   return rows.reduce((acc, row) => acc + (toNumber(row[key]) ?? 0), 0);
@@ -75,7 +90,7 @@ function badgeForRate(
   return { label: "OK", tone: "neutral" };
 }
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams?: SearchParams }) {
   const [overview, salesDaily, delivery, sellers, products, dataQuality] =
     await Promise.all([
       apiGet<OverviewResponse>("/metrics/overview"),
@@ -86,18 +101,58 @@ export default async function Home() {
       apiGet<DataQualityRow[]>("/metrics/data-quality?limit=200"),
     ]);
 
-  const totalOrders = sum(salesDaily, "total_orders");
-  const totalRevenue = sum(salesDaily, "total_revenue");
-  const deliveredOrders = sum(salesDaily, "delivered_orders");
-  const canceledOrders = sum(salesDaily, "canceled_orders");
+  let periodStart = getParam(searchParams, "start") ?? "";
+  let periodEnd = getParam(searchParams, "end") ?? "";
+  const stateFilter = getParam(searchParams, "state") ?? "";
+  const categoryFilter = getParam(searchParams, "category") ?? "";
+  const sellerFilter = getParam(searchParams, "seller") ?? "";
+
+  if (periodStart && periodEnd && periodStart > periodEnd) {
+    [periodStart, periodEnd] = [periodEnd, periodStart];
+  }
+
+  const salesDailyFiltered =
+    periodStart || periodEnd
+      ? salesDaily.filter((r) => {
+          const date = String(r.order_date ?? "");
+          if (periodStart && date < periodStart) return false;
+          if (periodEnd && date > periodEnd) return false;
+          return true;
+        })
+      : salesDaily;
+
+  const deliveryFiltered = stateFilter
+    ? delivery.filter((r) => String(r.customer_state ?? "") === stateFilter)
+    : delivery;
+
+  const productsFiltered = categoryFilter
+    ? products.filter(
+        (r) =>
+          String(r.product_category_name_english ?? "") === String(categoryFilter),
+      )
+    : products;
+
+  const sellersFiltered = sellers.filter((r) => {
+    if (sellerFilter && String(r.seller_id) !== String(sellerFilter)) return false;
+    if (stateFilter && String(r.seller_state) !== String(stateFilter)) return false;
+    return true;
+  });
+
+  const totalOrders = sum(salesDailyFiltered, "total_orders");
+  const totalRevenue = sum(salesDailyFiltered, "total_revenue");
+  const deliveredOrders = sum(salesDailyFiltered, "delivered_orders");
+  const canceledOrders = sum(salesDailyFiltered, "canceled_orders");
   const avgTicket = totalOrders > 0 ? totalRevenue / totalOrders : null;
 
-  const totalDelivered = sum(delivery, "delivered_orders");
-  const totalLate = sum(delivery, "late_orders");
+  const deliveryForKpi =
+    stateFilter && deliveryFiltered.length === 0 ? delivery : deliveryFiltered;
+
+  const totalDelivered = sum(deliveryForKpi, "delivered_orders");
+  const totalLate = sum(deliveryForKpi, "late_orders");
   const lateRate = totalDelivered > 0 ? totalLate / totalDelivered : null;
 
   const lastSalesDate =
-    salesDaily.length > 0 ? (salesDaily[0]?.order_date ?? null) : null;
+    salesDailyFiltered.length > 0 ? (salesDailyFiltered[0]?.order_date ?? null) : null;
   const latestQualityCheckedAt =
     dataQuality.length > 0 ? (dataQuality[0]?.checked_at ?? null) : null;
 
@@ -130,7 +185,7 @@ export default async function Home() {
   const totalQualityIssues = reliabilityMetrics.reduce((acc, m) => acc + m.value, 0);
   const lateBadge = badgeForRate(lateRate);
 
-  const sellersSorted = [...sellers].sort(
+  const sellersSortedAll = [...sellers].sort(
     (a, b) => (toNumber(b.total_revenue) ?? 0) - (toNumber(a.total_revenue) ?? 0),
   );
 
@@ -140,7 +195,7 @@ export default async function Home() {
     { alias: string; seller_id_trunc: string; seller_state: string }
   >();
 
-  for (const row of sellersSorted) {
+  for (const row of sellersSortedAll) {
     const state = String(row.seller_state ?? "NA");
     const count = (sellerStateCounters.get(state) ?? 0) + 1;
     sellerStateCounters.set(state, count);
@@ -153,7 +208,11 @@ export default async function Home() {
     });
   }
 
-  const sellersTop10 = sellersSorted.slice(0, 10);
+  const sellersDisplaySorted = [...sellersFiltered].sort(
+    (a, b) => (toNumber(b.total_revenue) ?? 0) - (toNumber(a.total_revenue) ?? 0),
+  );
+
+  const sellersTop10 = sellersDisplaySorted.slice(0, 10);
   const sellerChartData = sellersTop10.map((row) => {
     const meta = sellerAliases.get(String(row.seller_id));
     return {
@@ -163,29 +222,66 @@ export default async function Home() {
     };
   });
 
-  const topLateState = [...delivery]
+  const deliveryForInsights =
+    stateFilter && deliveryFiltered.length === 0 ? delivery : deliveryFiltered;
+
+  const topLateState = [...deliveryForInsights]
     .map((r) => ({
       state: r.customer_state,
       rate: toNumber(r.late_delivery_rate) ?? 0,
     }))
     .sort((a, b) => b.rate - a.rate)[0];
 
-  const topCategory = [...products]
+  const productsForInsights =
+    categoryFilter && productsFiltered.length === 0 ? products : productsFiltered;
+
+  const topCategory = [...productsForInsights]
     .map((r) => ({
       category: String(r.product_category_name_english ?? "unknown"),
       revenue: toNumber(r.total_revenue) ?? 0,
     }))
     .sort((a, b) => b.revenue - a.revenue)[0];
 
-  const topSeller = [...sellers]
+  const sellersForInsights =
+    (sellerFilter || stateFilter) && sellersFiltered.length === 0 ? sellers : sellersFiltered;
+
+  const topSeller = [...sellersForInsights]
     .map((r) => ({
       seller_id: r.seller_id,
       revenue: toNumber(r.total_revenue) ?? 0,
     }))
     .sort((a, b) => b.revenue - a.revenue)[0];
 
+  const stateOptions = Array.from(
+    new Set([
+      ...delivery.map((r) => String(r.customer_state ?? "")).filter(Boolean),
+      ...sellers.map((r) => String(r.seller_state ?? "")).filter(Boolean),
+    ]),
+  ).sort();
+
+  const categoryOptions = Array.from(
+    new Set(
+      products.map((r) => String(r.product_category_name_english ?? "")).filter(Boolean),
+    ),
+  ).sort();
+
+  const sellerOptions: SellerOption[] = sellersSortedAll.map((row) => {
+    const meta = sellerAliases.get(String(row.seller_id));
+    return {
+      seller_id: String(row.seller_id),
+      alias: meta?.alias ?? "Vendedor #???",
+      seller_state: meta?.seller_state ?? String(row.seller_state ?? "NA"),
+      seller_id_trunc: meta?.seller_id_trunc ?? truncateId(row.seller_id),
+    };
+  });
+
+  const statusOptions: StatusOption[] = [
+    { value: "delivered", label: "Entregue" },
+    { value: "canceled", label: "Cancelado" },
+  ];
+
   return (
-    <Shell
+    <ShellWithDrawer
       title={
         <span>
           Central de Performance e Confiabilidade do{" "}
@@ -194,6 +290,15 @@ export default async function Home() {
       }
       subtitle="Monitore receita, pedidos, entregas, vendedores, produtos e qualidade dos dados em uma visão executiva alimentada por camadas Bronze, Silver e Gold."
       badges={HERO_BADGES}
+      drawerTitle="Filtros"
+      drawerContent={
+        <FiltersPanel
+          states={stateOptions}
+          categories={categoryOptions}
+          sellers={sellerOptions}
+          statuses={statusOptions}
+        />
+      }
       nav={[
         { id: "overview", label: "Overview Comercial" },
         { id: "qualidade", label: "Qualidade dos Dados" },
@@ -204,6 +309,9 @@ export default async function Home() {
       ]}
       top={
         <div className="rounded-2xl border border-emerald-500/20 bg-zinc-950/25 p-4 shadow-sm">
+          <div className="mb-3">
+            <ActiveFilterChips sellerOptions={sellerOptions} statuses={statusOptions} />
+          </div>
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-1">
               <div className="text-xs font-semibold uppercase tracking-wide text-zinc-300">
@@ -276,7 +384,7 @@ export default async function Home() {
                     title="Receita por mês"
                     subtitle="Agregado no frontend a partir dos dados diários (últimos 12 meses)."
                   >
-                    <SalesDailyLineChart rows={salesDaily} limit={12} />
+                    <SalesDailyLineChart rows={salesDailyFiltered} limit={12} />
                   </ChartCard>
                 </div>
                 <div className="grid gap-4 lg:col-span-4">
@@ -284,7 +392,7 @@ export default async function Home() {
                     title="Performance por Estado"
                     subtitle="Top 10 estados por taxa de atraso."
                   >
-                    <DeliveryStateBarChart rows={delivery} limit={10} />
+                    <DeliveryStateBarChart rows={deliveryForInsights} limit={10} />
                   </ChartCard>
                   <OptionPills
                     title="KPIs Operacionais"
@@ -363,7 +471,7 @@ export default async function Home() {
                     title="Receita por categoria"
                     subtitle="Top 10 categorias por receita."
                   >
-                    <ProductCategoryBarChart rows={products} limit={10} />
+                    <ProductCategoryBarChart rows={productsForInsights} limit={10} />
                   </ChartCard>
                 </div>
                 <div className="lg:col-span-4">
@@ -482,7 +590,7 @@ export default async function Home() {
                   title="Receita por mês"
                   subtitle="Agregado no frontend a partir dos dados diários (últimos 12 meses)."
                 >
-                  <SalesDailyLineChart rows={salesDaily} limit={12} />
+                  <SalesDailyLineChart rows={salesDailyFiltered} limit={12} />
                 </ChartCard>
                 <DataTable
                   columns={[
@@ -510,7 +618,7 @@ export default async function Home() {
                       render: (r) => formatCurrencyBRL(r.average_ticket),
                     },
                   ]}
-                  rows={salesDaily.slice(0, 10)}
+                  rows={salesDailyFiltered.slice(0, 10)}
                   caption="Mostrando top 10 registros"
                 />
               </div>
@@ -529,7 +637,7 @@ export default async function Home() {
                   title="Taxa de atraso por estado (top 10)"
                   subtitle="Ordenado por maior taxa de atraso."
                 >
-                  <DeliveryStateBarChart rows={delivery} limit={10} />
+                  <DeliveryStateBarChart rows={deliveryForInsights} limit={10} />
                 </ChartCard>
                 <DataTable
                   columns={[
@@ -553,7 +661,7 @@ export default async function Home() {
                           : Number(r.avg_delivery_time_days).toFixed(2),
                     },
                   ]}
-                  rows={[...delivery]
+                  rows={[...deliveryForInsights]
                     .sort(
                       (a, b) =>
                         (toNumber(b.late_delivery_rate) ?? 0) -
@@ -639,7 +747,7 @@ export default async function Home() {
                   title="Receita por categoria (top 10)"
                   subtitle="Ordenado por maior receita."
                 >
-                  <ProductCategoryBarChart rows={products} limit={10} />
+                  <ProductCategoryBarChart rows={productsForInsights} limit={10} />
                 </ChartCard>
                 <DataTable
                   columns={[
@@ -661,7 +769,7 @@ export default async function Home() {
                       render: (r) => formatCurrencyBRL(r.avg_item_price),
                     },
                   ]}
-                  rows={[...products]
+                  rows={[...productsForInsights]
                     .sort(
                       (a, b) =>
                         (toNumber(b.total_revenue) ?? 0) -
