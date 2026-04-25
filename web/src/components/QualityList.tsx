@@ -10,7 +10,7 @@ export function QualityList({
   items: Array<{ title: string; value: React.ReactNode; status: Status }>;
 }) {
   return (
-    <div className="rounded-2xl border border-emerald-500/15 bg-zinc-950/25 p-4 shadow-sm">
+    <div className="flex h-full flex-col rounded-2xl border border-emerald-500/15 bg-zinc-950/25 p-4 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <div className="text-sm font-semibold text-zinc-50">
           Central de Confiabilidade
@@ -44,4 +44,3 @@ export function QualityList({
     </div>
   );
 }
-

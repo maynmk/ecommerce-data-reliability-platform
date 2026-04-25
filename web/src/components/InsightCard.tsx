@@ -14,7 +14,7 @@ export function InsightCard({
   badge?: { label: string; tone: "neutral" | "success" | "warning" | "danger" };
 }) {
   return (
-    <div className="rounded-2xl border border-emerald-500/15 bg-zinc-950/30 p-4 shadow-sm">
+    <div className="flex h-full min-h-[128px] flex-col rounded-2xl border border-emerald-500/15 bg-zinc-950/30 p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
           {title}
@@ -24,7 +24,7 @@ export function InsightCard({
       <div className="mt-2 text-xl font-semibold text-zinc-50 tabular-nums">
         {value}
       </div>
-      <div className="mt-2 text-sm leading-6 text-zinc-300">{description}</div>
+      <div className="mt-2 flex-1 text-sm leading-6 text-zinc-300">{description}</div>
     </div>
   );
 }

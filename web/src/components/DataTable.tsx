@@ -17,7 +17,7 @@ export function DataTable<Row extends Record<string, unknown>>({
   caption?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-emerald-500/15 bg-zinc-950/25 shadow-sm">
+    <div className="h-full rounded-2xl border border-emerald-500/15 bg-zinc-950/25 shadow-sm">
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
           {caption ? (

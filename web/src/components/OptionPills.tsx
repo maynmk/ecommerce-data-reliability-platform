@@ -10,9 +10,9 @@ export function OptionPills({
   activeIndex?: number;
 }) {
   return (
-    <div className="rounded-2xl border border-emerald-500/15 bg-zinc-950/25 p-4 shadow-sm">
+    <div className="flex h-full flex-col rounded-2xl border border-emerald-500/15 bg-zinc-950/25 p-4 shadow-sm">
       <div className="text-sm font-semibold text-zinc-50">{title}</div>
-      <div className="mt-3 grid gap-2">
+      <div className="mt-3 grid flex-1 gap-2">
         {options.map((opt, idx) => {
           const active = idx === activeIndex;
           return (
@@ -40,4 +40,3 @@ export function OptionPills({
     </div>
   );
 }
-

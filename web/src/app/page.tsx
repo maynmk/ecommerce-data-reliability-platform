@@ -333,7 +333,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
             </div>
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+          <div className="mt-4 grid items-stretch gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
             <ExecutiveCard
               title="Total de pedidos"
               value={formatNumber(totalOrders)}
@@ -378,19 +378,21 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
           id: "overview",
           content: (
             <div className="space-y-5">
-              <div className="grid gap-4 lg:grid-cols-12">
+              <div className="grid items-stretch gap-4 lg:grid-cols-12">
                 <div className="lg:col-span-8">
                   <ChartCard
                     title="Receita por mês"
                     subtitle="Agregado no frontend a partir dos dados diários (últimos 12 meses)."
+                    className="min-h-[420px]"
                   >
                     <SalesDailyLineChart rows={salesDailyFiltered} limit={12} />
                   </ChartCard>
                 </div>
-                <div className="grid gap-4 lg:col-span-4">
+                <div className="grid gap-4 lg:col-span-4 lg:h-full lg:grid-rows-2">
                   <ChartCard
                     title="Performance por Estado"
                     subtitle="Top 10 estados por taxa de atraso."
+                    className="min-h-[200px]"
                   >
                     <DeliveryStateBarChart rows={deliveryForInsights} limit={10} />
                   </ChartCard>
@@ -409,8 +411,11 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                 </div>
               </div>
 
-              <Section title="Insights executivos" description="Destaques no topo do funil de análise.">
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <Section
+                title="Insights executivos"
+                description="Destaques no topo do funil de análise."
+              >
+                <div className="grid auto-rows-fr items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   <InsightCard
                     title="Maior taxa de atraso"
                     value={
@@ -457,11 +462,12 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                 </div>
               </Section>
 
-              <div className="grid gap-4 lg:grid-cols-12">
+              <div className="grid auto-rows-fr items-stretch gap-4 lg:grid-cols-12">
                 <div className="lg:col-span-4">
                   <ChartCard
                     title="Receita por vendedor"
                     subtitle="Top 10 vendedores por receita (alias amigável)."
+                    className="min-h-[320px]"
                   >
                     <SellerRevenueBarChart data={sellerChartData} />
                   </ChartCard>
@@ -470,11 +476,12 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                   <ChartCard
                     title="Receita por categoria"
                     subtitle="Top 10 categorias por receita."
+                    className="min-h-[320px]"
                   >
                     <ProductCategoryBarChart rows={productsForInsights} limit={10} />
                   </ChartCard>
                 </div>
-                <div className="lg:col-span-4">
+                <div className="lg:col-span-4 min-h-[320px]">
                   <QualityList
                     items={reliabilityMetrics.map((m) => ({
                       title: m.label,
@@ -485,7 +492,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                 </div>
               </div>
 
-              <div className="grid gap-4 lg:grid-cols-12">
+              <div className="grid items-stretch gap-4 lg:grid-cols-12">
                 <div className="lg:col-span-7">
                   <DataTable
                     caption="Mostrando top 10 registros"
@@ -504,7 +511,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                     }))}
                   />
                 </div>
-                <div className="lg:col-span-5">
+                <div className="lg:col-span-5 h-full">
                   <StepFlow
                     caption="Arquitetura (compacta)"
                     steps={[
@@ -585,42 +592,47 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
               title={SECTION_TITLES.salesDaily}
               description="Acompanhe volume de pedidos, receita e ticket médio ao longo do tempo."
             >
-              <div className="grid gap-6 lg:grid-cols-2">
-                <ChartCard
-                  title="Receita por mês"
-                  subtitle="Agregado no frontend a partir dos dados diários (últimos 12 meses)."
-                >
-                  <SalesDailyLineChart rows={salesDailyFiltered} limit={12} />
-                </ChartCard>
-                <DataTable
-                  columns={[
-                    {
-                      key: "order_date",
-                      header: SALES_DAILY_COLUMN_LABELS.order_date,
-                      render: (r) => formatDate(r.order_date),
-                    },
-                    {
-                      key: "total_orders",
-                      header: SALES_DAILY_COLUMN_LABELS.total_orders,
-                      className: "text-right tabular-nums",
-                      render: (r) => formatNumber(r.total_orders),
-                    },
-                    {
-                      key: "total_revenue",
-                      header: SALES_DAILY_COLUMN_LABELS.total_revenue,
-                      className: "text-right tabular-nums",
-                      render: (r) => formatCurrencyBRL(r.total_revenue),
-                    },
-                    {
-                      key: "average_ticket",
-                      header: SALES_DAILY_COLUMN_LABELS.average_ticket,
-                      className: "text-right tabular-nums",
-                      render: (r) => formatCurrencyBRL(r.average_ticket),
-                    },
-                  ]}
-                  rows={salesDailyFiltered.slice(0, 10)}
-                  caption="Mostrando top 10 registros"
-                />
+              <div className="grid items-stretch gap-6 lg:grid-cols-12">
+                <div className="lg:col-span-7">
+                  <ChartCard
+                    title="Receita por mês"
+                    subtitle="Agregado no frontend a partir dos dados diários (últimos 12 meses)."
+                    className="min-h-[360px]"
+                  >
+                    <SalesDailyLineChart rows={salesDailyFiltered} limit={12} />
+                  </ChartCard>
+                </div>
+                <div className="lg:col-span-5 h-full">
+                  <DataTable
+                    columns={[
+                      {
+                        key: "order_date",
+                        header: SALES_DAILY_COLUMN_LABELS.order_date,
+                        render: (r) => formatDate(r.order_date),
+                      },
+                      {
+                        key: "total_orders",
+                        header: SALES_DAILY_COLUMN_LABELS.total_orders,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatNumber(r.total_orders),
+                      },
+                      {
+                        key: "total_revenue",
+                        header: SALES_DAILY_COLUMN_LABELS.total_revenue,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatCurrencyBRL(r.total_revenue),
+                      },
+                      {
+                        key: "average_ticket",
+                        header: SALES_DAILY_COLUMN_LABELS.average_ticket,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatCurrencyBRL(r.average_ticket),
+                      },
+                    ]}
+                    rows={salesDailyFiltered.slice(0, 10)}
+                    caption="Mostrando top 10 registros"
+                  />
+                </div>
               </div>
             </Section>
           ),
@@ -632,44 +644,49 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
               title={SECTION_TITLES.deliveryPerformance}
               description="Identifique estados com maior taxa de atraso e maior tempo médio de entrega."
             >
-              <div className="grid gap-6 lg:grid-cols-2">
-                <ChartCard
-                  title="Taxa de atraso por estado (top 10)"
-                  subtitle="Ordenado por maior taxa de atraso."
-                >
-                  <DeliveryStateBarChart rows={deliveryForInsights} limit={10} />
-                </ChartCard>
-                <DataTable
-                  columns={[
-                    {
-                      key: "customer_state",
-                      header: DELIVERY_PERFORMANCE_COLUMN_LABELS.customer_state,
-                    },
-                    {
-                      key: "late_delivery_rate",
-                      header: DELIVERY_PERFORMANCE_COLUMN_LABELS.late_delivery_rate,
-                      className: "text-right tabular-nums",
-                      render: (r) => formatPercent(r.late_delivery_rate),
-                    },
-                    {
-                      key: "avg_delivery_time_days",
-                      header: DELIVERY_PERFORMANCE_COLUMN_LABELS.avg_delivery_time_days,
-                      className: "text-right tabular-nums",
-                      render: (r) =>
-                        r.avg_delivery_time_days == null
-                          ? "—"
-                          : Number(r.avg_delivery_time_days).toFixed(2),
-                    },
-                  ]}
-                  rows={[...deliveryForInsights]
-                    .sort(
-                      (a, b) =>
-                        (toNumber(b.late_delivery_rate) ?? 0) -
-                        (toNumber(a.late_delivery_rate) ?? 0),
-                    )
-                    .slice(0, 10)}
-                  caption="Mostrando top 10 registros"
-                />
+              <div className="grid items-stretch gap-6 lg:grid-cols-12">
+                <div className="lg:col-span-7">
+                  <ChartCard
+                    title="Taxa de atraso por estado (top 10)"
+                    subtitle="Ordenado por maior taxa de atraso."
+                    className="min-h-[360px]"
+                  >
+                    <DeliveryStateBarChart rows={deliveryForInsights} limit={10} />
+                  </ChartCard>
+                </div>
+                <div className="lg:col-span-5 h-full">
+                  <DataTable
+                    columns={[
+                      {
+                        key: "customer_state",
+                        header: DELIVERY_PERFORMANCE_COLUMN_LABELS.customer_state,
+                      },
+                      {
+                        key: "late_delivery_rate",
+                        header: DELIVERY_PERFORMANCE_COLUMN_LABELS.late_delivery_rate,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatPercent(r.late_delivery_rate),
+                      },
+                      {
+                        key: "avg_delivery_time_days",
+                        header: DELIVERY_PERFORMANCE_COLUMN_LABELS.avg_delivery_time_days,
+                        className: "text-right tabular-nums",
+                        render: (r) =>
+                          r.avg_delivery_time_days == null
+                            ? "—"
+                            : Number(r.avg_delivery_time_days).toFixed(2),
+                      },
+                    ]}
+                    rows={[...deliveryForInsights]
+                      .sort(
+                        (a, b) =>
+                          (toNumber(b.late_delivery_rate) ?? 0) -
+                          (toNumber(a.late_delivery_rate) ?? 0),
+                      )
+                      .slice(0, 10)}
+                    caption="Mostrando top 10 registros"
+                  />
+                </div>
               </div>
             </Section>
           ),
@@ -681,56 +698,61 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
               title={SECTION_TITLES.sellerPerformance}
               description="Ranking top 10 por receita (sem nomes reais, apenas alias amigável)."
             >
-              <div className="grid gap-6 lg:grid-cols-2">
-                <ChartCard
-                  title="Receita por vendedor (top 10)"
-                  subtitle="Ranking por receita total."
-                >
-                  <SellerRevenueBarChart data={sellerChartData} />
-                </ChartCard>
-                <DataTable
-                  columns={[
-                    {
-                      key: "seller_id",
-                      header: SELLER_PERFORMANCE_COLUMN_LABELS.seller_id,
-                      render: (r) => {
-                        const meta = sellerAliases.get(String(r.seller_id));
-                        const alias = meta?.alias ?? "Vendedor #???";
-                        const title = meta?.seller_id_trunc
-                          ? `seller_id: ${meta.seller_id_trunc}`
-                          : `seller_id: ${truncateId(r.seller_id)}`;
-                        return (
-                          <span title={title} className="whitespace-nowrap">
-                            {alias}
-                          </span>
-                        );
+              <div className="grid items-stretch gap-6 lg:grid-cols-12">
+                <div className="lg:col-span-7">
+                  <ChartCard
+                    title="Receita por vendedor (top 10)"
+                    subtitle="Ranking por receita total."
+                    className="min-h-[360px]"
+                  >
+                    <SellerRevenueBarChart data={sellerChartData} />
+                  </ChartCard>
+                </div>
+                <div className="lg:col-span-5 h-full">
+                  <DataTable
+                    columns={[
+                      {
+                        key: "seller_id",
+                        header: SELLER_PERFORMANCE_COLUMN_LABELS.seller_id,
+                        render: (r) => {
+                          const meta = sellerAliases.get(String(r.seller_id));
+                          const alias = meta?.alias ?? "Vendedor #???";
+                          const title = meta?.seller_id_trunc
+                            ? `seller_id: ${meta.seller_id_trunc}`
+                            : `seller_id: ${truncateId(r.seller_id)}`;
+                          return (
+                            <span title={title} className="whitespace-nowrap">
+                              {alias}
+                            </span>
+                          );
+                        },
                       },
-                    },
-                    {
-                      key: "total_revenue",
-                      header: SELLER_PERFORMANCE_COLUMN_LABELS.total_revenue,
-                      className: "text-right tabular-nums",
-                      render: (r) => formatCurrencyBRL(r.total_revenue),
-                    },
-                    {
-                      key: "avg_review_score",
-                      header: SELLER_PERFORMANCE_COLUMN_LABELS.avg_review_score,
-                      className: "text-right tabular-nums",
-                      render: (r) =>
-                        r.avg_review_score == null
-                          ? "—"
-                          : Number(r.avg_review_score).toFixed(2),
-                    },
-                    {
-                      key: "late_delivery_rate",
-                      header: SELLER_PERFORMANCE_COLUMN_LABELS.late_delivery_rate,
-                      className: "text-right tabular-nums",
-                      render: (r) => formatPercent(r.late_delivery_rate),
-                    },
-                  ]}
-                  rows={sellersTop10}
-                  caption="Mostrando top 10 registros"
-                />
+                      {
+                        key: "total_revenue",
+                        header: SELLER_PERFORMANCE_COLUMN_LABELS.total_revenue,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatCurrencyBRL(r.total_revenue),
+                      },
+                      {
+                        key: "avg_review_score",
+                        header: SELLER_PERFORMANCE_COLUMN_LABELS.avg_review_score,
+                        className: "text-right tabular-nums",
+                        render: (r) =>
+                          r.avg_review_score == null
+                            ? "—"
+                            : Number(r.avg_review_score).toFixed(2),
+                      },
+                      {
+                        key: "late_delivery_rate",
+                        header: SELLER_PERFORMANCE_COLUMN_LABELS.late_delivery_rate,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatPercent(r.late_delivery_rate),
+                      },
+                    ]}
+                    rows={sellersTop10}
+                    caption="Mostrando top 10 registros"
+                  />
+                </div>
               </div>
             </Section>
           ),
@@ -742,42 +764,47 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
               title={SECTION_TITLES.productPerformance}
               description="Ranking top 10 de categorias por receita."
             >
-              <div className="grid gap-6 lg:grid-cols-2">
-                <ChartCard
-                  title="Receita por categoria (top 10)"
-                  subtitle="Ordenado por maior receita."
-                >
-                  <ProductCategoryBarChart rows={productsForInsights} limit={10} />
-                </ChartCard>
-                <DataTable
-                  columns={[
-                    {
-                      key: "product_category_name_english",
-                      header:
-                        PRODUCT_PERFORMANCE_COLUMN_LABELS.product_category_name_english,
-                    },
-                    {
-                      key: "total_revenue",
-                      header: PRODUCT_PERFORMANCE_COLUMN_LABELS.total_revenue,
-                      className: "text-right tabular-nums",
-                      render: (r) => formatCurrencyBRL(r.total_revenue),
-                    },
-                    {
-                      key: "avg_item_price",
-                      header: PRODUCT_PERFORMANCE_COLUMN_LABELS.avg_item_price,
-                      className: "text-right tabular-nums",
-                      render: (r) => formatCurrencyBRL(r.avg_item_price),
-                    },
-                  ]}
-                  rows={[...productsForInsights]
-                    .sort(
-                      (a, b) =>
-                        (toNumber(b.total_revenue) ?? 0) -
-                        (toNumber(a.total_revenue) ?? 0),
-                    )
-                    .slice(0, 10)}
-                  caption="Mostrando top 10 registros"
-                />
+              <div className="grid items-stretch gap-6 lg:grid-cols-12">
+                <div className="lg:col-span-7">
+                  <ChartCard
+                    title="Receita por categoria (top 10)"
+                    subtitle="Ordenado por maior receita."
+                    className="min-h-[360px]"
+                  >
+                    <ProductCategoryBarChart rows={productsForInsights} limit={10} />
+                  </ChartCard>
+                </div>
+                <div className="lg:col-span-5 h-full">
+                  <DataTable
+                    columns={[
+                      {
+                        key: "product_category_name_english",
+                        header:
+                          PRODUCT_PERFORMANCE_COLUMN_LABELS.product_category_name_english,
+                      },
+                      {
+                        key: "total_revenue",
+                        header: PRODUCT_PERFORMANCE_COLUMN_LABELS.total_revenue,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatCurrencyBRL(r.total_revenue),
+                      },
+                      {
+                        key: "avg_item_price",
+                        header: PRODUCT_PERFORMANCE_COLUMN_LABELS.avg_item_price,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatCurrencyBRL(r.avg_item_price),
+                      },
+                    ]}
+                    rows={[...productsForInsights]
+                      .sort(
+                        (a, b) =>
+                          (toNumber(b.total_revenue) ?? 0) -
+                          (toNumber(a.total_revenue) ?? 0),
+                      )
+                      .slice(0, 10)}
+                    caption="Mostrando top 10 registros"
+                  />
+                </div>
               </div>
             </Section>
           ),

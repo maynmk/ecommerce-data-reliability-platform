@@ -10,7 +10,7 @@ export function StepFlow({
   caption?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-emerald-500/15 bg-zinc-950/25 p-4 shadow-sm">
+    <div className="flex h-full flex-col rounded-2xl border border-emerald-500/15 bg-zinc-950/25 p-4 shadow-sm">
       {caption ? (
         <div className="text-sm font-semibold text-zinc-50">{caption}</div>
       ) : null}
