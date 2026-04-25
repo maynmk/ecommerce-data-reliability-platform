@@ -68,6 +68,15 @@ dbt run --profiles-dir .
 dbt test --profiles-dir .
 ```
 
+## dbt (gold)
+
+Rode os modelos Gold (dim/fct/marts) a partir da pasta `dbt/`:
+
+```bash
+dbt run --profiles-dir . --select gold
+dbt test --profiles-dir . --select gold
+```
+
 Se o comando `dbt` nao estiver no PATH do Windows, use:
 
 ```powershell
@@ -75,4 +84,11 @@ $DbtExe = (py -3.12 -c "import sys; from pathlib import Path; print(Path(sys.exe
 & $DbtExe debug --project-dir dbt --profiles-dir dbt
 & $DbtExe run --project-dir dbt --profiles-dir dbt
 & $DbtExe test --project-dir dbt --profiles-dir dbt
+```
+
+Para rodar apenas Gold com esse mesmo atalho:
+
+```powershell
+& $DbtExe run --project-dir dbt --profiles-dir dbt --select gold
+& $DbtExe test --project-dir dbt --profiles-dir dbt --select gold
 ```

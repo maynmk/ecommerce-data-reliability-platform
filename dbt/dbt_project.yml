@@ -20,3 +20,6 @@ models:
   ecommerce_data_reliability_platform:
     staging:
       +materialized: view
+    gold:
+      +schema: gold
+      +materialized: table
