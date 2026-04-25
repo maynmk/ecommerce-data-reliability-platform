@@ -1,11 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
 import { Badge } from "@/components/Badge";
 
 export type NavItem = { id: string; label: string };
+
+function normalizeHash(value: string): string {
+  return value.replace(/^#/, "").trim();
+}
 
 export function Shell({
   title,
@@ -25,21 +29,27 @@ export function Shell({
   children?: React.ReactNode;
 }) {
   const tabs = useMemo(() => nav.map((n) => n.id), [nav]);
-  const [activeId, setActiveId] = useState(() => {
-    if (typeof window !== "undefined") {
-      const hash = window.location.hash.replace("#", "");
-      if (hash && tabs.includes(hash)) return hash;
-    }
-    return tabs[0] ?? "overview";
-  });
+  const defaultTab = tabs[0] ?? "overview";
 
-  useEffect(() => {
+  const activeId = useSyncExternalStore(
+    (onStoreChange) => {
+      window.addEventListener("hashchange", onStoreChange);
+      return () => window.removeEventListener("hashchange", onStoreChange);
+    },
+    () => {
+      const hash = normalizeHash(window.location.hash);
+      return hash && tabs.includes(hash) ? hash : defaultTab;
+    },
+    () => defaultTab,
+  );
+
+  const setActive = (id: string) => {
     if (typeof window === "undefined") return;
-    if (!activeId) return;
     const url = new URL(window.location.href);
-    url.hash = activeId;
+    url.hash = id;
     window.history.replaceState(null, "", url.toString());
-  }, [activeId]);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  };
 
   const panelMap = useMemo(() => {
     const map = new Map<string, React.ReactNode>();
@@ -106,13 +116,13 @@ export function Shell({
                     aria-selected={selected}
                     aria-controls={`panel-${item.id}`}
                     tabIndex={selected ? 0 : -1}
-                    onClick={() => setActiveId(item.id)}
+                    onClick={() => setActive(item.id)}
                     onKeyDown={(e) => {
                       if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
                       e.preventDefault();
                       const delta = e.key === "ArrowRight" ? 1 : -1;
                       const next = (idx + delta + nav.length) % nav.length;
-                      setActiveId(nav[next]!.id);
+                      setActive(nav[next]!.id);
                     }}
                     className={[
                       "shrink-0 rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition-colors",
