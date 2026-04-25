@@ -115,3 +115,14 @@ Para rodar localmente (a partir da raiz do repo), com as variáveis do `.env`:
 ```bash
 uvicorn api.app.main:app --reload --port 8000
 ```
+
+## Frontend (Next.js)
+
+1. Configure a URL da API em `web/.env.local` (use `web/.env.local.example` como base).
+2. Rode o frontend:
+
+```bash
+cd web
+npm install
+npm run dev
+```
