@@ -40,7 +40,12 @@ ecommerce-data-reliability-platform/
 
 ## Escopo atual
 
-Este repositorio contem a infraestrutura local minima para PostgreSQL, um pipeline Python para carregar os CSVs brutos da Olist no schema `bronze` e a configuracao do dbt Core para gerar modelos staging no schema `silver`. API, dashboard e modelos gold ainda nao foram implementados.
+Este repositorio contem a infraestrutura local minima para PostgreSQL, um pipeline Python para carregar os CSVs brutos da Olist no schema `bronze` e a configuracao do dbt Core para gerar:
+
+- modelos staging no schema `silver`
+- modelos gold no schema `gold`
+
+API e dashboard seguem fora do escopo atual.
 
 ## Documentacao
 
@@ -68,6 +73,15 @@ dbt run --profiles-dir .
 dbt test --profiles-dir .
 ```
 
+## dbt (gold)
+
+Rode os modelos Gold (dim/fct/marts) a partir da pasta `dbt/`:
+
+```bash
+dbt run --profiles-dir . --select gold
+dbt test --profiles-dir . --select gold
+```
+
 Se o comando `dbt` nao estiver no PATH do Windows, use:
 
 ```powershell
@@ -75,4 +89,29 @@ $DbtExe = (py -3.12 -c "import sys; from pathlib import Path; print(Path(sys.exe
 & $DbtExe debug --project-dir dbt --profiles-dir dbt
 & $DbtExe run --project-dir dbt --profiles-dir dbt
 & $DbtExe test --project-dir dbt --profiles-dir dbt
+```
+
+Para rodar apenas Gold com esse mesmo atalho:
+
+```powershell
+& $DbtExe run --project-dir dbt --profiles-dir dbt --select gold
+& $DbtExe test --project-dir dbt --profiles-dir dbt --select gold
+```
+
+## API (FastAPI)
+
+A API expõe métricas analíticas consultando apenas as tabelas do schema `gold` (marts):
+
+- `GET /health`
+- `GET /metrics/overview`
+- `GET /metrics/sales-daily`
+- `GET /metrics/delivery-performance`
+- `GET /metrics/seller-performance`
+- `GET /metrics/product-performance`
+- `GET /metrics/data-quality`
+
+Para rodar localmente (a partir da raiz do repo), com as variáveis do `.env`:
+
+```bash
+uvicorn api.app.main:app --reload --port 8000
 ```
