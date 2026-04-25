@@ -61,7 +61,7 @@ export function DataTable<Row extends Record<string, unknown>>({
                     <td
                       key={String(col.key)}
                       className={[
-                        "px-4 py-3 align-top text-zinc-800",
+                        "px-4 py-2.5 align-top text-zinc-800",
                         col.className ?? "",
                       ].join(" ")}
                     >

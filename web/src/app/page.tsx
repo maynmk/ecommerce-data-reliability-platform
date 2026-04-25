@@ -3,6 +3,7 @@ import { Badge } from "@/components/Badge";
 import { Shell } from "@/components/Shell";
 import { ExecutiveCard } from "@/components/ExecutiveCard";
 import { InfoCard } from "@/components/InfoCard";
+import { InsightCard } from "@/components/InsightCard";
 import { Section } from "@/components/Section";
 import { StatusCard } from "@/components/StatusCard";
 import { StepFlow } from "@/components/StepFlow";
@@ -119,6 +120,29 @@ export default async function Home() {
 
   const lateBadge = badgeForRate(lateRate);
 
+  const topLateState = [...delivery]
+    .map((r) => ({
+      state: r.customer_state,
+      rate: toNumber(r.late_delivery_rate) ?? 0,
+    }))
+    .sort((a, b) => b.rate - a.rate)[0];
+
+  const topCategory = [...products]
+    .map((r) => ({
+      category: String(r.product_category_name_english ?? "unknown"),
+      revenue: toNumber(r.total_revenue) ?? 0,
+    }))
+    .sort((a, b) => b.revenue - a.revenue)[0];
+
+  const topSeller = [...sellers]
+    .map((r) => ({
+      seller: r.seller_id,
+      revenue: toNumber(r.total_revenue) ?? 0,
+    }))
+    .sort((a, b) => b.revenue - a.revenue)[0];
+
+  const totalQualityIssues = reliabilityMetrics.reduce((acc, m) => acc + m.value, 0);
+
   return (
     <Shell
       title="Central de Performance e Confiabilidade do E-commerce"
@@ -126,11 +150,12 @@ export default async function Home() {
       badges={HERO_BADGES}
       nav={[
         { id: "visao-geral", label: "Visão geral" },
+        { id: "confiabilidade", label: "Confiabilidade" },
         { id: "vendas", label: "Vendas" },
         { id: "entregas", label: "Entregas" },
         { id: "vendedores", label: "Vendedores" },
         { id: "produtos", label: "Produtos" },
-        { id: "qualidade", label: "Qualidade dos dados" },
+        { id: "arquitetura", label: "Arquitetura" },
       ]}
     >
       <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
@@ -191,6 +216,38 @@ export default async function Home() {
             statusTone={lateBadge?.tone ?? "neutral"}
           />
         </div>
+
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <InsightCard
+            title="Maior taxa de atraso"
+            value={
+              topLateState
+                ? `${topLateState.state} • ${formatPercent(topLateState.rate)}`
+                : "—"
+            }
+            description="Estado com maior risco de atraso entre os agregados do mart de entregas."
+          />
+          <InsightCard
+            title="Categoria com maior receita"
+            value={topCategory ? topCategory.category : "—"}
+            description={topCategory ? formatCurrencyBRL(topCategory.revenue) : "—"}
+          />
+          <InsightCard
+            title="Vendedor com maior receita"
+            value={topSeller ? truncateId(topSeller.seller) : "—"}
+            description={topSeller ? formatCurrencyBRL(topSeller.revenue) : "—"}
+          />
+          <InsightCard
+            title="Pedidos com problemas"
+            value={formatNumber(totalQualityIssues)}
+            description="Soma dos principais indicadores de confiabilidade (último snapshot)."
+            badge={
+              totalQualityIssues === 0
+                ? { label: "OK", tone: "success" }
+                : { label: "Atenção", tone: "warning" }
+            }
+          />
+        </div>
       </div>
 
       <div id="visao-geral" className="scroll-mt-28">
@@ -200,7 +257,7 @@ export default async function Home() {
         >
           <div className="grid gap-6 lg:grid-cols-2">
             <DataTable
-              caption="Contagem de linhas por tabela (schema gold)"
+              caption="Mostrando top 10 registros"
               columns={[
                 { key: "table_name", header: OVERVIEW_COLUMN_LABELS.table_name },
                 {
@@ -215,35 +272,11 @@ export default async function Home() {
                 table_name: MART_TABLE_LABELS[row.table_name] ?? row.table_name,
               }))}
             />
-
-            <DataTable
-              caption="Último snapshot de qualidade do dado (schema gold)"
-              columns={[
-                {
-                  key: "metric_name",
-                  header: DATA_QUALITY_COLUMN_LABELS.metric_name,
-                  render: (r) =>
-                    DATA_QUALITY_METRIC_LABELS[r.metric_name] ?? r.metric_name,
-                },
-                {
-                  key: "metric_value",
-                  header: DATA_QUALITY_COLUMN_LABELS.metric_value,
-                  className: "text-right",
-                  render: (r) => formatNumber(r.metric_value),
-                },
-                {
-                  key: "checked_at",
-                  header: DATA_QUALITY_COLUMN_LABELS.checked_at,
-                  render: (r) => formatDateTime(r.checked_at),
-                },
-              ]}
-              rows={overview.data_quality}
-            />
           </div>
         </Section>
       </div>
 
-      <div id="qualidade" className="scroll-mt-28">
+      <div id="confiabilidade" className="scroll-mt-28">
         <Section
           title="Central de Confiabilidade dos Dados"
           description="Monitore inconsistências que podem afetar relatórios, dashboards e decisões de negócio."
@@ -264,6 +297,35 @@ export default async function Home() {
                 status={m.status}
               />
             ))}
+          </div>
+
+          <div className="mt-6">
+            <div className="mb-3 text-sm font-semibold text-zinc-900">
+              Detalhamento dos indicadores de qualidade
+            </div>
+            <DataTable
+              caption="Mostrando top 10 registros"
+              columns={[
+                {
+                  key: "metric_name",
+                  header: DATA_QUALITY_COLUMN_LABELS.metric_name,
+                  render: (r) =>
+                    DATA_QUALITY_METRIC_LABELS[r.metric_name] ?? r.metric_name,
+                },
+                {
+                  key: "metric_value",
+                  header: DATA_QUALITY_COLUMN_LABELS.metric_value,
+                  className: "text-right tabular-nums",
+                  render: (r) => formatNumber(r.metric_value),
+                },
+                {
+                  key: "checked_at",
+                  header: DATA_QUALITY_COLUMN_LABELS.checked_at,
+                  render: (r) => formatDateTime(r.checked_at),
+                },
+              ]}
+              rows={dataQuality.slice(0, 10)}
+            />
           </div>
         </Section>
       </div>
@@ -303,10 +365,10 @@ export default async function Home() {
         >
           <div className="grid gap-6 lg:grid-cols-2">
             <ChartCard
-              title="Vendas por dia (últimos 30 dias)"
-              subtitle="Pedidos e receita agregados por data."
+              title="Receita por mês"
+              subtitle="Agregado no frontend a partir dos dados diários (últimos 12 meses)."
             >
-              <SalesDailyLineChart rows={salesDaily} limit={30} />
+              <SalesDailyLineChart rows={salesDaily} limit={12} />
             </ChartCard>
             <DataTable
               columns={[
@@ -335,7 +397,7 @@ export default async function Home() {
                 },
               ]}
               rows={salesDaily.slice(0, 10)}
-              caption="Mostrando os 10 registros mais recentes."
+              caption="Mostrando top 10 registros"
             />
           </div>
         </Section>
@@ -382,7 +444,7 @@ export default async function Home() {
                     (toNumber(a.late_delivery_rate) ?? 0),
                 )
                 .slice(0, 10)}
-              caption="Mostrando top 10 estados."
+              caption="Mostrando top 10 registros"
             />
           </div>
         </Section>
@@ -435,8 +497,8 @@ export default async function Home() {
                 render: (r) => formatPercent(r.late_delivery_rate),
               },
             ]}
-            rows={sellers.slice(0, 20)}
-            caption="Mostrando top 20 registros."
+            rows={sellers.slice(0, 10)}
+            caption="Mostrando top 10 registros"
           />
         </Section>
       </div>
@@ -472,46 +534,23 @@ export default async function Home() {
                   render: (r) => formatCurrencyBRL(r.avg_item_price),
                 },
               ]}
-              rows={products.slice(0, 10)}
-              caption="Mostrando top 10 categorias."
+              rows={[...products]
+                .sort(
+                  (a, b) =>
+                    (toNumber(b.total_revenue) ?? 0) - (toNumber(a.total_revenue) ?? 0),
+                )
+                .slice(0, 10)}
+              caption="Mostrando top 10 registros"
             />
           </div>
         </Section>
       </div>
 
-      <Section
-        title={SECTION_TITLES.dataQualityCenter}
-        description="Monitore inconsistências que podem distorcer análises e relatórios."
-      >
-          <DataTable
-            columns={[
-              {
-                key: "metric_name",
-                header: DATA_QUALITY_COLUMN_LABELS.metric_name,
-                render: (r) =>
-                  DATA_QUALITY_METRIC_LABELS[r.metric_name] ?? r.metric_name,
-              },
-              {
-                key: "metric_value",
-                header: DATA_QUALITY_COLUMN_LABELS.metric_value,
-                className: "text-right tabular-nums",
-                render: (r) => formatNumber(r.metric_value),
-              },
-              {
-                key: "checked_at",
-                header: DATA_QUALITY_COLUMN_LABELS.checked_at,
-                render: (r) => formatDateTime(r.checked_at),
-              },
-            ]}
-          rows={dataQuality.slice(0, 20)}
-          caption="Mostrando as 20 medições mais recentes (limit=200)."
-        />
-      </Section>
-
-      <Section
-        title="Arquitetura dos Dados"
-        description="Este dashboard consome somente métricas da camada Gold expostas pela API FastAPI, evitando acesso direto aos dados brutos."
-      >
+      <div id="arquitetura" className="scroll-mt-28">
+        <Section
+          title="Arquitetura dos Dados"
+          description="Este dashboard consome somente métricas da camada Gold expostas pela API FastAPI, evitando acesso direto aos dados brutos."
+        >
           <StepFlow
             caption="Fluxo de dados (fim a fim)"
             steps={[
@@ -524,7 +563,8 @@ export default async function Home() {
               "Dashboard",
             ]}
           />
-      </Section>
+        </Section>
+      </div>
     </Shell>
   );
 }

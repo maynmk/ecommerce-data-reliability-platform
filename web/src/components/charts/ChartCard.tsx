@@ -17,8 +17,7 @@ export function ChartCard({
           <div className="text-xs leading-5 text-zinc-600">{subtitle}</div>
         ) : null}
       </div>
-      <div className="mt-4 h-72">{children}</div>
+      <div className="mt-4 h-64">{children}</div>
     </div>
   );
 }
-

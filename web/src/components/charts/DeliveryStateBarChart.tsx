@@ -42,12 +42,16 @@ export function DeliveryStateBarChart({
           tick={{ fill: "#52525b", fontSize: 12 }}
           axisLine={{ stroke: "#e4e4e7" }}
           tickLine={{ stroke: "#e4e4e7" }}
+          tickMargin={6}
         />
         <YAxis
           tickFormatter={(v) => `${Math.round(Number(v) * 100)}%`}
           tick={{ fill: "#52525b", fontSize: 12 }}
           axisLine={{ stroke: "#e4e4e7" }}
           tickLine={{ stroke: "#e4e4e7" }}
+          tickMargin={6}
+          domain={[0, "dataMax"]}
+          tickCount={5}
         />
         <Tooltip
           formatter={(v) => tooltipFormatter(v)}
@@ -58,4 +62,3 @@ export function DeliveryStateBarChart({
     </ResponsiveContainer>
   );
 }
-

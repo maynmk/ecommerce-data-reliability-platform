@@ -18,6 +18,12 @@ function tooltipFormatter(value: unknown) {
   return formatCurrencyBRL(value);
 }
 
+function shortLabel(value: string): string {
+  const text = value.trim();
+  if (text.length <= 18) return text;
+  return `${text.slice(0, 16)}…`;
+}
+
 export function ProductCategoryBarChart({
   rows,
   limit = 10,
@@ -27,7 +33,7 @@ export function ProductCategoryBarChart({
 }) {
   const data = [...rows]
     .map((r) => ({
-      category: String(r.product_category_name_english ?? "unknown"),
+      category: shortLabel(String(r.product_category_name_english ?? "unknown")),
       total_revenue: toNumber(r.total_revenue) ?? 0,
     }))
     .sort((a, b) => b.total_revenue - a.total_revenue)
@@ -43,9 +49,10 @@ export function ProductCategoryBarChart({
           axisLine={{ stroke: "#e4e4e7" }}
           tickLine={{ stroke: "#e4e4e7" }}
           interval={0}
-          angle={-20}
+          angle={-15}
           textAnchor="end"
           height={60}
+          tickMargin={6}
         />
         <YAxis
           tickFormatter={(v) => formatCurrencyBRL(v)}
@@ -53,6 +60,7 @@ export function ProductCategoryBarChart({
           width={86}
           axisLine={{ stroke: "#e4e4e7" }}
           tickLine={{ stroke: "#e4e4e7" }}
+          tickMargin={6}
         />
         <Tooltip
           formatter={(v) => tooltipFormatter(v)}
@@ -63,4 +71,3 @@ export function ProductCategoryBarChart({
     </ResponsiveContainer>
   );
 }
-

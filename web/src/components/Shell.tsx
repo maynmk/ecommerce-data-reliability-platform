@@ -36,12 +36,12 @@ export function Shell({
               </div>
             </div>
 
-            <nav className="-mx-1 flex gap-1 overflow-x-auto pb-1">
+            <nav className="-mx-1 flex gap-2 overflow-x-auto pb-1">
               {nav.map((item) => (
                 <a
                   key={item.id}
                   href={`#${item.id}`}
-                  className="shrink-0 rounded-lg px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                  className="shrink-0 rounded-full border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 shadow-sm hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900"
                 >
                   {item.label}
                 </a>
@@ -51,7 +51,7 @@ export function Shell({
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl space-y-12 px-6 pb-16 pt-32 md:pt-28">
+      <main className="mx-auto max-w-6xl space-y-10 px-6 pb-14 pt-32 md:pt-28">
         {children}
       </main>
 
@@ -64,4 +64,3 @@ export function Shell({
     </div>
   );
 }
-
