@@ -58,42 +58,49 @@ export function SalesDailyLineChart({
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" />
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(34,197,94,0.12)" />
         <XAxis
           dataKey="month"
           tickFormatter={(v) => formatMonthLabel(String(v))}
-          tick={{ fill: "#52525b", fontSize: 12 }}
-          axisLine={{ stroke: "#e4e4e7" }}
-          tickLine={{ stroke: "#e4e4e7" }}
+          tick={{ fill: "#a1a1aa", fontSize: 12 }}
+          axisLine={{ stroke: "rgba(34,197,94,0.12)" }}
+          tickLine={{ stroke: "rgba(34,197,94,0.12)" }}
           minTickGap={18}
         />
         <YAxis
           yAxisId="left"
           tickFormatter={(v) => formatNumber(v)}
-          tick={{ fill: "#52525b", fontSize: 12 }}
-          axisLine={{ stroke: "#e4e4e7" }}
-          tickLine={{ stroke: "#e4e4e7" }}
+          tick={{ fill: "#a1a1aa", fontSize: 12 }}
+          axisLine={{ stroke: "rgba(34,197,94,0.12)" }}
+          tickLine={{ stroke: "rgba(34,197,94,0.12)" }}
         />
         <YAxis
           yAxisId="right"
           orientation="right"
           tickFormatter={(v) => formatCurrencyBRL(v)}
-          tick={{ fill: "#52525b", fontSize: 12 }}
+          tick={{ fill: "#a1a1aa", fontSize: 12 }}
           width={86}
-          axisLine={{ stroke: "#e4e4e7" }}
-          tickLine={{ stroke: "#e4e4e7" }}
+          axisLine={{ stroke: "rgba(34,197,94,0.12)" }}
+          tickLine={{ stroke: "rgba(34,197,94,0.12)" }}
         />
         <Tooltip
           formatter={(v, n) => tooltipFormatter(v, String(n))}
           labelFormatter={(label) => formatMonthLabel(String(label))}
-          cursor={{ fill: "rgba(24,24,27,0.04)" }}
+          cursor={{ fill: "rgba(34,197,94,0.08)" }}
+          contentStyle={{
+            background: "rgba(9,12,10,0.92)",
+            border: "1px solid rgba(34,197,94,0.2)",
+            borderRadius: 12,
+            color: "#e5e7eb",
+          }}
+          labelStyle={{ color: "#a1a1aa" }}
         />
         <Line
           yAxisId="left"
           type="monotone"
           dataKey="orders"
           name="Pedidos"
-          stroke="#18181b"
+          stroke="#a1a1aa"
           strokeWidth={2}
           dot={false}
         />
@@ -102,7 +109,7 @@ export function SalesDailyLineChart({
           type="monotone"
           dataKey="revenue"
           name="Receita"
-          stroke="#71717a"
+          stroke="#22c55e"
           strokeWidth={2}
           dot={false}
         />

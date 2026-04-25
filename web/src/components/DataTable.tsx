@@ -17,22 +17,22 @@ export function DataTable<Row extends Record<string, unknown>>({
   caption?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+    <div className="rounded-2xl border border-emerald-500/15 bg-zinc-950/25 shadow-sm">
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
           {caption ? (
-            <caption className="px-4 py-3 text-left text-xs font-medium text-zinc-500">
+            <caption className="px-4 py-3 text-left text-xs font-medium text-zinc-400">
               {caption}
             </caption>
           ) : null}
-          <thead className="border-b border-zinc-200 bg-zinc-50/80">
+          <thead className="border-b border-emerald-500/10 bg-zinc-950/35">
             <tr>
               {columns.map((col) => (
                 <th
                   key={String(col.key)}
                   scope="col"
                   className={[
-                    "px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-600",
+                    "px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-300",
                     col.className ?? "",
                   ].join(" ")}
                 >
@@ -46,7 +46,7 @@ export function DataTable<Row extends Record<string, unknown>>({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-4 py-8 text-center text-zinc-500"
+                  className="px-4 py-8 text-center text-zinc-400"
                 >
                   Sem dados para exibir.
                 </td>
@@ -55,13 +55,13 @@ export function DataTable<Row extends Record<string, unknown>>({
               rows.map((row, idx) => (
                 <tr
                   key={idx}
-                  className="border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50/70"
+                  className="border-b border-emerald-500/5 last:border-b-0 hover:bg-emerald-500/5"
                 >
                   {columns.map((col) => (
                     <td
                       key={String(col.key)}
                       className={[
-                        "px-4 py-2.5 align-top text-zinc-800",
+                        "px-4 py-2.5 align-top text-zinc-100",
                         col.className ?? "",
                       ].join(" ")}
                     >

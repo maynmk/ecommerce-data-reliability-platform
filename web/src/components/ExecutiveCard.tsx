@@ -18,21 +18,20 @@ export function ExecutiveCard({
   statusTone?: StatusTone;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+    <div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-zinc-950/40 p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+          <div className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
             {title}
           </div>
-          <div className="mt-2 text-2xl font-semibold leading-tight text-zinc-900">
+          <div className="mt-2 text-2xl font-semibold leading-tight text-zinc-50 tabular-nums">
             {value}
           </div>
         </div>
         {statusLabel ? <Badge tone={statusTone}>{statusLabel}</Badge> : null}
       </div>
-      <div className="mt-3 text-sm leading-6 text-zinc-600">{description}</div>
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-zinc-900/0 via-zinc-900/10 to-zinc-900/0" />
+      <div className="mt-3 text-sm leading-6 text-zinc-300">{description}</div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-500/25 to-emerald-500/0" />
     </div>
   );
 }
-

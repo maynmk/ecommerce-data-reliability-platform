@@ -9,14 +9,14 @@ export function Badge({
 }) {
   const toneClass =
     tone === "brand"
-      ? "border-zinc-900/10 bg-zinc-900 text-white"
+      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
       : tone === "success"
-        ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-        : tone === "warning"
-          ? "border-amber-200 bg-amber-50 text-amber-800"
+        ? "border-emerald-500/35 bg-emerald-500/10 text-emerald-200"
+      : tone === "warning"
+          ? "border-amber-500/35 bg-amber-500/10 text-amber-200"
           : tone === "danger"
-            ? "border-rose-200 bg-rose-50 text-rose-800"
-            : "border-zinc-200 bg-white text-zinc-700";
+            ? "border-rose-500/35 bg-rose-500/10 text-rose-200"
+            : "border-emerald-500/15 bg-zinc-950/40 text-zinc-200";
 
   return (
     <span
@@ -29,4 +29,3 @@ export function Badge({
     </span>
   );
 }
-

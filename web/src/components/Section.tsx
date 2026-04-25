@@ -12,13 +12,12 @@ export function Section({
   return (
     <section className="space-y-4">
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold text-zinc-900">{title}</h2>
+        <h2 className="text-lg font-semibold text-zinc-50">{title}</h2>
         {description ? (
-          <p className="text-sm text-zinc-600">{description}</p>
+          <p className="text-sm text-zinc-300">{description}</p>
         ) : null}
       </div>
       {children}
     </section>
   );
 }
-

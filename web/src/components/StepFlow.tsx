@@ -10,9 +10,9 @@ export function StepFlow({
   caption?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-emerald-500/15 bg-zinc-950/25 p-4 shadow-sm">
       {caption ? (
-        <div className="text-sm font-semibold text-zinc-900">{caption}</div>
+        <div className="text-sm font-semibold text-zinc-50">{caption}</div>
       ) : null}
       <div className="mt-4 flex flex-wrap items-center gap-2">
         {steps.map((step, idx) => (
@@ -21,7 +21,7 @@ export function StepFlow({
               {step}
             </Badge>
             {idx < steps.length - 1 ? (
-              <span className="text-zinc-400">→</span>
+              <span className="text-zinc-500">→</span>
             ) : null}
           </React.Fragment>
         ))}
@@ -29,4 +29,3 @@ export function StepFlow({
     </div>
   );
 }
-

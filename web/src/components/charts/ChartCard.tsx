@@ -10,14 +10,14 @@ export function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-emerald-500/20 bg-zinc-950/35 p-4 shadow-sm">
       <div className="space-y-1">
-        <div className="text-sm font-semibold text-zinc-900">{title}</div>
+        <div className="text-sm font-semibold text-zinc-50">{title}</div>
         {subtitle ? (
-          <div className="text-xs leading-5 text-zinc-600">{subtitle}</div>
+          <div className="text-xs leading-5 text-zinc-300">{subtitle}</div>
         ) : null}
       </div>
-      <div className="mt-4 h-64">{children}</div>
+      <div className="mt-4 h-56">{children}</div>
     </div>
   );
 }

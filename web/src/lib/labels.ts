@@ -89,8 +89,7 @@ export function labelDataQualityMetric(value: string): string {
 export const HERO_BADGES = [
   "Python Pipeline",
   "PostgreSQL",
-  "dbt Core",
-  "Gold Layer",
+  "dbt Gold",
   "FastAPI",
   "Next.js",
 ] as const;
@@ -104,4 +103,3 @@ export const EXECUTIVE_CARD_HELPERS = {
   late_delivery_rate:
     "Proporção de entregas com atraso entre pedidos entregues.",
 } as const;
-
