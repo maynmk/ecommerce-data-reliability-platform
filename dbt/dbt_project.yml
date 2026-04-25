@@ -19,6 +19,7 @@ clean-targets:
 models:
   ecommerce_data_reliability_platform:
     staging:
+      +schema: silver
       +materialized: view
     gold:
       +schema: gold

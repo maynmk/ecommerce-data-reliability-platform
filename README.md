@@ -40,7 +40,12 @@ ecommerce-data-reliability-platform/
 
 ## Escopo atual
 
-Este repositorio contem a infraestrutura local minima para PostgreSQL, um pipeline Python para carregar os CSVs brutos da Olist no schema `bronze` e a configuracao do dbt Core para gerar modelos staging no schema `silver`. API, dashboard e modelos gold ainda nao foram implementados.
+Este repositorio contem a infraestrutura local minima para PostgreSQL, um pipeline Python para carregar os CSVs brutos da Olist no schema `bronze` e a configuracao do dbt Core para gerar:
+
+- modelos staging no schema `silver`
+- modelos gold no schema `gold`
+
+API e dashboard seguem fora do escopo atual.
 
 ## Documentacao
 
