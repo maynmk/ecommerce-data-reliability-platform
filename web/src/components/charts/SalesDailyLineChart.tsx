@@ -11,7 +11,12 @@ import {
   YAxis,
 } from "recharts";
 
-import { formatCurrencyBRL, formatNumber, toNumber } from "@/lib/format";
+import {
+  formatCurrencyBRL,
+  formatCurrencyBRLCompact,
+  formatNumber,
+  toNumber,
+} from "@/lib/format";
 import type { SalesDailyRow } from "@/lib/types";
 
 export type SalesKpiMode = "dual" | "revenue" | "orders" | "ticket" | "delivered";
@@ -123,20 +128,24 @@ export function SalesDailyLineChart({
             <YAxis
               yAxisId="right"
               orientation="right"
-              tickFormatter={(v) => formatCurrencyBRL(v)}
+              tickFormatter={(v) => formatCurrencyBRLCompact(v)}
               tick={{ fill: "#a1a1aa", fontSize: 12 }}
               width={86}
               axisLine={{ stroke: "rgba(34,197,94,0.12)" }}
               tickLine={{ stroke: "rgba(34,197,94,0.12)" }}
+              tickCount={4}
             />
           </>
         ) : (
           <YAxis
-            tickFormatter={(v) => (showCurrency ? formatCurrencyBRL(v) : formatNumber(v))}
+            tickFormatter={(v) =>
+              showCurrency ? formatCurrencyBRLCompact(v) : formatNumber(v)
+            }
             tick={{ fill: "#a1a1aa", fontSize: 12 }}
             width={showCurrency ? 86 : 50}
             axisLine={{ stroke: "rgba(34,197,94,0.12)" }}
             tickLine={{ stroke: "rgba(34,197,94,0.12)" }}
+            tickCount={4}
           />
         )}
         <Tooltip

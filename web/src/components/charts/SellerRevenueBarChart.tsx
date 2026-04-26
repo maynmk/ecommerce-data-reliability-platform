@@ -11,7 +11,7 @@ import {
   YAxis,
 } from "recharts";
 
-import { formatCurrencyBRL } from "@/lib/format";
+import { formatCurrencyBRL, formatCurrencyBRLCompact } from "@/lib/format";
 
 export function SellerRevenueBarChart({
   data,
@@ -40,17 +40,18 @@ export function SellerRevenueBarChart({
           <BarChart
             data={data}
             layout="vertical"
-            margin={{ top: 8, right: 16, left: 24, bottom: 0 }}
+            margin={{ top: 8, right: 28, left: 24, bottom: 12 }}
             barCategoryGap={14}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(34,197,94,0.12)" />
             <XAxis
               type="number"
-              tickFormatter={(v) => formatCurrencyBRL(v)}
+              tickFormatter={(v) => formatCurrencyBRLCompact(v)}
               tick={{ fill: "#a1a1aa", fontSize: 12 }}
               axisLine={{ stroke: "rgba(34,197,94,0.12)" }}
               tickLine={{ stroke: "rgba(34,197,94,0.12)" }}
               tickMargin={6}
+              tickCount={4}
               interval={0}
             />
             <YAxis

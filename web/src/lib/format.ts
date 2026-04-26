@@ -24,6 +24,37 @@ export function formatCurrencyBRL(value: unknown): string {
   }).format(n);
 }
 
+export function formatCurrencyBRLCompact(value: unknown): string {
+  const n = toNumber(value);
+  if (n === null) return "—";
+
+  const abs = Math.abs(n);
+  if (abs < 1_000) {
+    return formatCurrencyBRL(n);
+  }
+
+  if (abs < 1_000_000) {
+    const thousands = Math.round(n / 1_000);
+    return `R$ ${new Intl.NumberFormat("pt-BR").format(thousands)} mil`;
+  }
+
+  if (abs < 1_000_000_000) {
+    const millions = Number((n / 1_000_000).toFixed(1));
+    const formatted = new Intl.NumberFormat("pt-BR", {
+      maximumFractionDigits: 1,
+      minimumFractionDigits: Number.isInteger(millions) ? 0 : 1,
+    }).format(millions);
+    return `R$ ${formatted} mi`;
+  }
+
+  const billions = Number((n / 1_000_000_000).toFixed(1));
+  const formatted = new Intl.NumberFormat("pt-BR", {
+    maximumFractionDigits: 1,
+    minimumFractionDigits: Number.isInteger(billions) ? 0 : 1,
+  }).format(billions);
+  return `R$ ${formatted} bi`;
+}
+
 export function formatPercent(value: unknown): string {
   const n = toNumber(value);
   if (n === null) return "—";
@@ -49,4 +80,3 @@ export function formatDateTime(value: unknown): string {
     timeStyle: "medium",
   }).format(date);
 }
-
