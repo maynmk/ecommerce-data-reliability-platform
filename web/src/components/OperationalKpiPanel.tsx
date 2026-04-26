@@ -10,7 +10,6 @@ import { formatNumber } from "@/lib/format";
 import type { DeliveryPerformanceRow, SalesDailyRow } from "@/lib/types";
 
 type ActiveKpi =
-  | "all"
   | "revenue"
   | "orders"
   | "ticket"
@@ -19,12 +18,6 @@ type ActiveKpi =
   | "quality";
 
 const KPI_OPTIONS: OptionPill[] = [
-  {
-    id: "all",
-    label: "Todos",
-    activeClassName: "border-emerald-500/30 bg-emerald-500/10 text-emerald-100",
-    activeDotClassName: "bg-emerald-300",
-  },
   {
     id: "revenue",
     label: "Receita",
@@ -65,11 +58,6 @@ const KPI_OPTIONS: OptionPill[] = [
 
 function chartMeta(active: ActiveKpi): { title: string; subtitle: string } {
   switch (active) {
-    case "all":
-      return {
-        title: "Visão geral por mês",
-        subtitle: "Receita e pedidos por mês (últimos 12 meses).",
-      };
     case "orders":
       return {
         title: "Pedidos por mês",
@@ -105,7 +93,6 @@ function chartMeta(active: ActiveKpi): { title: string; subtitle: string } {
 }
 
 function toSalesMode(active: ActiveKpi): SalesKpiMode | null {
-  if (active === "all") return "dual";
   if (active === "revenue") return "revenue";
   if (active === "orders") return "orders";
   if (active === "ticket") return "ticket";
@@ -122,7 +109,7 @@ export function OperationalKpiPanel({
   deliveryRows: DeliveryPerformanceRow[];
   totalQualityIssues: number;
 }) {
-  const [active, setActive] = React.useState<ActiveKpi>("all");
+  const [active, setActive] = React.useState<ActiveKpi>("revenue");
 
   const onChange = (id: string) => {
     const next = id as ActiveKpi;
