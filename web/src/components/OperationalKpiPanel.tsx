@@ -93,7 +93,7 @@ function chartMeta(active: ActiveKpi): { title: string; subtitle: string } {
     case "quality":
       return {
         title: "Resumo de qualidade",
-        subtitle: "Métrica detalhada disponível na Central de Confiabilidade.",
+        subtitle: "Indicadores de qualidade disponíveis na Central de Confiabilidade.",
       };
     case "revenue":
     default:
@@ -144,7 +144,13 @@ export function OperationalKpiPanel({
           {salesMode ? (
             <SalesDailyLineChart rows={salesDailyRows} limit={12} mode={salesMode} />
           ) : active === "late" ? (
-            <DeliveryStateBarChart rows={deliveryRows} limit={10} />
+            deliveryRows.length > 0 ? (
+              <DeliveryStateBarChart rows={deliveryRows} limit={10} />
+            ) : (
+              <div className="flex h-full items-center justify-center rounded-xl border border-emerald-500/10 bg-zinc-950/20 px-4 text-sm text-zinc-300">
+                Métrica de atraso disponível na seção Performance por Estado.
+              </div>
+            )
           ) : (
             <div className="flex h-full flex-col justify-center rounded-xl border border-emerald-500/10 bg-zinc-950/20 p-4">
               <div className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
