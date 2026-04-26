@@ -963,9 +963,13 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                   <ChartCard
                     title="Top 20 vendedores por receita"
                     subtitle="Ranking top 20 por receita total."
-                    className="min-h-[760px]"
+                    className="h-[520px]"
                   >
-                    <SellerRevenueBarChart data={sellerChartDataTop20} height={760} />
+                    <SellerRevenueBarChart
+                      data={sellerChartDataTop20}
+                      height={Math.max(sellerChartDataTop20.length * 42, 420)}
+                      scrollable
+                    />
                   </ChartCard>
                 </div>
                 <div className="lg:col-span-5 h-full">
@@ -1076,9 +1080,14 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                   <ChartCard
                     title="Top 20 categorias por receita"
                     subtitle="Ordenado por maior receita."
-                    className="min-h-[760px]"
+                    className="h-[520px]"
                   >
-                    <ProductCategoryBarChart rows={productsTop20} limit={20} height={760} />
+                    <ProductCategoryBarChart
+                      rows={productsTop20}
+                      limit={20}
+                      height={Math.max(productsTop20.length * 42, 420)}
+                      scrollable
+                    />
                   </ChartCard>
                 </div>
                 <div className="lg:col-span-5 h-full">
