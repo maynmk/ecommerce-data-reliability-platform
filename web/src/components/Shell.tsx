@@ -66,7 +66,7 @@ export function Shell({
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[var(--background)]">
-      <header className="fixed inset-x-0 top-0 z-20 border-b border-emerald-500/15 bg-zinc-950/70 backdrop-blur">
+      <header className="border-b border-emerald-500/15 bg-zinc-950/70 backdrop-blur">
         <div className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-3">
             <div className="flex items-start justify-between gap-4">
@@ -131,52 +131,57 @@ export function Shell({
                 </button>
               </div>
             </div>
-
-            <nav
-              className="-mx-1 flex gap-2 overflow-x-auto pb-1"
-              role="tablist"
-              aria-label="Seções do dashboard"
-            >
-              {nav.map((item, idx) => {
-                const selected = item.id === activeId;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={selected}
-                    aria-controls={`panel-${item.id}`}
-                    tabIndex={selected ? 0 : -1}
-                    onClick={() => setActive(item.id)}
-                    onKeyDown={(e) => {
-                      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
-                      e.preventDefault();
-                      const delta = e.key === "ArrowRight" ? 1 : -1;
-                      const next = (idx + delta + nav.length) % nav.length;
-                      setActive(nav[next]!.id);
-                    }}
-                    className={[
-                      "shrink-0 rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition-colors",
-                      selected
-                        ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-100"
-                        : "border-emerald-500/15 bg-zinc-950/40 text-zinc-200 hover:border-emerald-500/30 hover:bg-emerald-500/10",
-                    ].join(" ")}
-                  >
-                    {item.label}
-                  </button>
-                );
-              })}
-            </nav>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-[1600px] space-y-8 px-4 pb-12 pt-32 sm:px-6 lg:px-8 md:pt-28">
+      <div className="sticky top-0 z-30 border-b border-emerald-500/15 bg-zinc-950/80 shadow-[0_6px_24px_rgba(0,0,0,0.22)] backdrop-blur">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-2 sm:px-6 lg:px-8">
+          <nav
+            className="-mx-1 flex gap-2 overflow-x-auto pb-1"
+            role="tablist"
+            aria-label="Seções do dashboard"
+          >
+            {nav.map((item, idx) => {
+              const selected = item.id === activeId;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  aria-controls={`panel-${item.id}`}
+                  tabIndex={selected ? 0 : -1}
+                  onClick={() => setActive(item.id)}
+                  onKeyDown={(e) => {
+                    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+                    e.preventDefault();
+                    const delta = e.key === "ArrowRight" ? 1 : -1;
+                    const next = (idx + delta + nav.length) % nav.length;
+                    setActive(nav[next]!.id);
+                  }}
+                  className={[
+                    "shrink-0 rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition-colors",
+                    selected
+                      ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-100"
+                      : "border-emerald-500/15 bg-zinc-950/40 text-zinc-200 hover:border-emerald-500/30 hover:bg-emerald-500/10",
+                  ].join(" ")}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
+
+      <main className="mx-auto w-full max-w-[1600px] space-y-8 px-4 py-8 sm:px-6 lg:px-8">
         {top ? <div className="space-y-6">{top}</div> : null}
         <div
           id={`panel-${activeId}`}
           role="tabpanel"
           aria-label={nav.find((n) => n.id === activeId)?.label ?? activeId}
+          className="scroll-mt-24"
         >
           {renderContent}
         </div>
