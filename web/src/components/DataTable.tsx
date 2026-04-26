@@ -27,8 +27,8 @@ export function DataTable<Row extends Record<string, unknown>>({
         className ?? "",
       ].join(" ")}
     >
-      <div className="flex-1 overflow-auto">
-        <table className="min-w-full text-sm">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        <table className="min-w-full table-fixed text-sm">
           {caption ? (
             <caption className="px-4 py-3 text-left text-xs font-medium text-zinc-400">
               {caption}

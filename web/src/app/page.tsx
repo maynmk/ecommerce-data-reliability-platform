@@ -653,7 +653,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                   Detalhamento dos indicadores de qualidade
                 </div>
                 <DataTable
-                  caption="Tabela completa com rolagem interna"
+                  caption="Tabela completa de indicadores de qualidade. Todos os registros disponíveis, com rolagem interna."
                   columns={[
                     {
                       key: "metric_name",
@@ -757,7 +757,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
 
               <div className="grid items-stretch gap-4 lg:grid-cols-12">
                 <div className="lg:col-span-6">
-                  <DataTable
+                <DataTable
                     columns={[
                       {
                         key: "month",
@@ -790,7 +790,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                       },
                     ]}
                     rows={salesMonthlyRows}
-                    caption="Tabela completa com rolagem interna"
+                    caption="Tabela completa de vendas mensais. Todos os registros disponíveis, com rolagem interna."
                     emptyMessage="Dado não disponível na API atual"
                     className="h-[420px] md:h-[520px]"
                   />
@@ -835,7 +835,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                       },
                     ]}
                     rows={salesDailyDetailRows}
-                    caption="Tabela completa com rolagem interna"
+                    caption="Tabela completa de vendas diárias. Todos os registros disponíveis, com rolagem interna."
                     emptyMessage="Dado não disponível na API atual"
                     className="h-[420px] md:h-[520px]"
                   />
@@ -919,7 +919,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                       },
                     ]}
                     rows={deliveriesDetailRows}
-                    caption="Tabela completa com rolagem interna"
+                    caption="Tabela completa de estados. Todos os registros disponíveis, com rolagem interna."
                     emptyMessage="Dado não disponível na API atual"
                     className="h-[420px] md:h-[520px]"
                   />
@@ -985,7 +985,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                             ? `seller_id: ${meta.seller_id_trunc}`
                             : `seller_id: ${truncateId(r.seller_id)}`;
                           return (
-                            <span title={title} className="whitespace-nowrap">
+                            <span title={title} className="block max-w-full truncate whitespace-nowrap">
                               {alias}
                             </span>
                           );
@@ -1032,7 +1032,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                       },
                     ]}
                     rows={sellersDetailRows}
-                    caption="Tabela completa com rolagem interna"
+                    caption="Tabela completa de vendedores. Todos os registros disponíveis, com rolagem interna."
                     emptyMessage="Dado não disponível na API atual"
                     className="h-[420px] md:h-[520px]"
                   />
@@ -1097,8 +1097,14 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                         key: "product_category_name_english",
                         header:
                           PRODUCT_PERFORMANCE_COLUMN_LABELS.product_category_name_english,
-                        render: (r) =>
-                          labelProductCategory(String(r.product_category_name_english ?? "")),
+                        render: (r) => {
+                          const raw = String(r.product_category_name_english ?? "");
+                          return (
+                            <span title={raw} className="block max-w-full truncate">
+                              {labelProductCategory(raw)}
+                            </span>
+                          );
+                        },
                       },
                       {
                         key: "total_orders",
@@ -1139,7 +1145,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                       },
                     ]}
                     rows={productsDetailRows}
-                    caption="Tabela completa com rolagem interna"
+                    caption="Tabela completa de categorias. Todos os registros disponíveis, com rolagem interna."
                     emptyMessage="Dado não disponível na API atual"
                     className="h-[420px] md:h-[520px]"
                   />
