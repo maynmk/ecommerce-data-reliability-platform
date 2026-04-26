@@ -11,10 +11,12 @@ export function DataTable<Row extends Record<string, unknown>>({
   columns,
   rows,
   caption,
+  emptyMessage = "Sem dados para exibir.",
 }: {
   columns: ColumnDef<Row>[];
   rows: Row[];
   caption?: string;
+  emptyMessage?: string;
 }) {
   return (
     <div className="h-full rounded-2xl border border-emerald-500/15 bg-zinc-950/25 shadow-sm">
@@ -48,7 +50,7 @@ export function DataTable<Row extends Record<string, unknown>>({
                   colSpan={columns.length}
                   className="px-4 py-8 text-center text-zinc-400"
                 >
-                  Sem dados para exibir.
+                  {emptyMessage}
                 </td>
               </tr>
             ) : (

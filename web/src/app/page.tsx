@@ -90,6 +90,74 @@ function badgeForRate(
   return { label: "OK", tone: "neutral" };
 }
 
+function extractMonthKey(value: unknown): string | null {
+  const raw = String(value ?? "");
+  const match = raw.match(/^(\d{4})-(\d{2})/);
+  if (!match) return null;
+  return `${match[1]}-${match[2]}`;
+}
+
+function formatMonthLabel(value: string): string {
+  const date = new Date(`${value}-01T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("pt-BR", {
+    month: "short",
+    year: "2-digit",
+  }).format(date);
+}
+
+type SalesMonthlyRow = {
+  month: string;
+  total_orders: number;
+  delivered_orders: number;
+  canceled_orders: number;
+  total_revenue: number;
+  total_freight: number;
+  average_ticket: number | null;
+};
+
+function aggregateMonthlySales(rows: SalesDailyRow[]): SalesMonthlyRow[] {
+  const monthly = new Map<
+    string,
+    {
+      total_orders: number;
+      delivered_orders: number;
+      canceled_orders: number;
+      total_revenue: number;
+      total_freight: number;
+    }
+  >();
+
+  for (const row of rows) {
+    const monthKey = extractMonthKey(row.order_date);
+    if (!monthKey) continue;
+
+    const current = monthly.get(monthKey) ?? {
+      total_orders: 0,
+      delivered_orders: 0,
+      canceled_orders: 0,
+      total_revenue: 0,
+      total_freight: 0,
+    };
+
+    current.total_orders += toNumber(row.total_orders) ?? 0;
+    current.delivered_orders += toNumber(row.delivered_orders) ?? 0;
+    current.canceled_orders += toNumber(row.canceled_orders) ?? 0;
+    current.total_revenue += toNumber(row.total_revenue) ?? 0;
+    current.total_freight += toNumber(row.total_freight) ?? 0;
+    monthly.set(monthKey, current);
+  }
+
+  return [...monthly.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, values]) => ({
+      month,
+      ...values,
+      average_ticket:
+        values.total_orders > 0 ? values.total_revenue / values.total_orders : null,
+    }));
+}
+
 export default async function Home({ searchParams }: { searchParams?: SearchParams }) {
   const [overview, salesDaily, delivery, sellers, products, dataQuality] =
     await Promise.all([
@@ -184,6 +252,13 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
 
   const totalQualityIssues = reliabilityMetrics.reduce((acc, m) => acc + m.value, 0);
   const lateBadge = badgeForRate(lateRate);
+  const salesMonthlyRows = aggregateMonthlySales(salesDailyFiltered);
+  const salesDailyRecentRows = [...salesDailyFiltered]
+    .sort((a, b) => String(a.order_date).localeCompare(String(b.order_date)))
+    .slice(-20);
+  const qualityDetailRows = [...dataQuality]
+    .sort((a, b) => String(b.checked_at).localeCompare(String(a.checked_at)))
+    .slice(0, 20);
 
   const sellersSortedAll = [...sellers].sort(
     (a, b) => (toNumber(b.total_revenue) ?? 0) - (toNumber(a.total_revenue) ?? 0),
@@ -213,7 +288,16 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
   );
 
   const sellersTop10 = sellersDisplaySorted.slice(0, 10);
+  const sellersTop20 = sellersDisplaySorted.slice(0, 20);
   const sellerChartData = sellersTop10.map((row) => {
+    const meta = sellerAliases.get(String(row.seller_id));
+    return {
+      seller_label: meta?.alias ?? "Vendedor #???",
+      seller_id_trunc: meta?.seller_id_trunc ?? truncateId(row.seller_id),
+      total_revenue: toNumber(row.total_revenue) ?? 0,
+    };
+  });
+  const sellerChartDataTop20 = sellersTop20.map((row) => {
     const meta = sellerAliases.get(String(row.seller_id));
     return {
       seller_label: meta?.alias ?? "Vendedor #???",
@@ -234,6 +318,15 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
 
   const productsForInsights =
     categoryFilter && productsFiltered.length === 0 ? products : productsFiltered;
+  const productsTop20 = [...productsForInsights]
+    .sort((a, b) => (toNumber(b.total_revenue) ?? 0) - (toNumber(a.total_revenue) ?? 0))
+    .slice(0, 20);
+  const deliveriesTop20 = [...deliveryForInsights]
+    .sort(
+      (a, b) =>
+        (toNumber(b.late_delivery_rate) ?? 0) - (toNumber(a.late_delivery_rate) ?? 0),
+    )
+    .slice(0, 20);
 
   const topCategory = [...productsForInsights]
     .map((r) => ({
@@ -509,6 +602,33 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
               title="Central de Confiabilidade dos Dados"
               description="Monitore inconsistências que podem afetar relatórios e decisões."
             >
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <StatusCard
+                  title="Total de pedidos"
+                  value={formatNumber(totalOrdersValue)}
+                  helper="Base de referência usada para calcular a proporção dos problemas."
+                  status={totalOrdersValue ? "OK" : "Atenção"}
+                />
+                <StatusCard
+                  title="Indicadores com problema"
+                  value={formatNumber(totalQualityIssues)}
+                  helper="Soma dos principais indicadores de qualidade observados no snapshot."
+                  status={totalQualityIssues === 0 ? "OK" : "Atenção"}
+                />
+                <StatusCard
+                  title="Última verificação"
+                  value={latestQualityCheckedAt ? formatDateTime(latestQualityCheckedAt) : "—"}
+                  helper="Timestamp da última verificação disponível na API."
+                  status={latestQualityCheckedAt ? "OK" : "Atenção"}
+                />
+                <StatusCard
+                  title="Itens monitorados"
+                  value={formatNumber(reliabilityMetrics.length)}
+                  helper="Quantidade de indicadores exibidos nesta aba."
+                  status="OK"
+                />
+              </div>
+
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {reliabilityMetrics.map((m) => (
                   <StatusCard
@@ -532,7 +652,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                   Detalhamento dos indicadores de qualidade
                 </div>
                 <DataTable
-                  caption="Mostrando top 10 registros"
+                  caption="Mostrando top 20 registros"
                   columns={[
                     {
                       key: "metric_name",
@@ -547,12 +667,36 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                       render: (r) => formatNumber(r.metric_value),
                     },
                     {
+                      key: "status",
+                      header: "Status",
+                      render: (r) => {
+                        const status = classifyReliability(
+                          toNumber(r.metric_value) ?? 0,
+                          totalOrdersValue,
+                        );
+                        return (
+                          <Badge
+                            tone={
+                              status === "OK"
+                                ? "success"
+                                : status === "Atenção"
+                                  ? "warning"
+                                  : "danger"
+                            }
+                          >
+                            {status}
+                          </Badge>
+                        );
+                      },
+                    },
+                    {
                       key: "checked_at",
                       header: DATA_QUALITY_COLUMN_LABELS.checked_at,
                       render: (r) => formatDateTime(r.checked_at),
                     },
                   ]}
-                  rows={dataQuality.slice(0, 10)}
+                  rows={qualityDetailRows}
+                  emptyMessage="Dado não disponível na API atual"
                 />
               </div>
             </Section>
@@ -563,25 +707,60 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
           content: (
             <Section
               title={SECTION_TITLES.salesDaily}
-              description="Acompanhe volume de pedidos, receita e ticket médio ao longo do tempo."
+              description="Detalhamento de vendas por período, com resumo mensal e visão diária."
             >
-              <div className="grid items-stretch gap-6 lg:grid-cols-12">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <ExecutiveCard
+                  title="Total de pedidos"
+                  value={formatNumber(totalOrders)}
+                  description="Volume total considerando o filtro atual."
+                />
+                <ExecutiveCard
+                  title="Receita total"
+                  value={formatCurrencyBRL(totalRevenue)}
+                  description="Soma de receita no período selecionado."
+                />
+                <ExecutiveCard
+                  title="Ticket médio"
+                  value={avgTicket === null ? "—" : formatCurrencyBRL(avgTicket)}
+                  description="Receita total dividida pelo número de pedidos."
+                />
+                <ExecutiveCard
+                  title="Frete total"
+                  value={formatCurrencyBRL(sum(salesDailyFiltered, "total_freight"))}
+                  description="Soma do frete na série diária disponível."
+                />
+              </div>
+
+              <div className="grid items-stretch gap-4 lg:grid-cols-12">
                 <div className="lg:col-span-7">
                   <ChartCard
                     title="Receita por mês"
-                    subtitle="Agregado no frontend a partir dos dados diários (últimos 12 meses)."
+                    subtitle="Agregado no frontend a partir dos dados diários (últimos 20 meses)."
                     className="min-h-[360px]"
                   >
-                    <SalesDailyLineChart rows={salesDailyFiltered} limit={12} />
+                    <SalesDailyLineChart rows={salesDailyFiltered} limit={20} mode="revenue" />
                   </ChartCard>
                 </div>
                 <div className="lg:col-span-5 h-full">
+                  <ChartCard
+                    title="Pedidos por mês"
+                    subtitle="Mesma série agregada, agora destacando pedidos."
+                    className="min-h-[360px]"
+                  >
+                    <SalesDailyLineChart rows={salesDailyFiltered} limit={20} mode="orders" />
+                  </ChartCard>
+                </div>
+              </div>
+
+              <div className="grid items-stretch gap-4 lg:grid-cols-12">
+                <div className="lg:col-span-6">
                   <DataTable
                     columns={[
                       {
-                        key: "order_date",
-                        header: SALES_DAILY_COLUMN_LABELS.order_date,
-                        render: (r) => formatDate(r.order_date),
+                        key: "month",
+                        header: "Mês",
+                        render: (r) => formatMonthLabel(r.month),
                       },
                       {
                         key: "total_orders",
@@ -601,9 +780,60 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                         className: "text-right tabular-nums",
                         render: (r) => formatCurrencyBRL(r.average_ticket),
                       },
+                      {
+                        key: "total_freight",
+                        header: "Frete total",
+                        className: "text-right tabular-nums",
+                        render: (r) => formatCurrencyBRL(r.total_freight),
+                      },
                     ]}
-                    rows={salesDailyFiltered.slice(0, 10)}
-                    caption="Mostrando top 10 registros"
+                    rows={salesMonthlyRows.slice(-20)}
+                    caption="Mostrando top 20 registros"
+                    emptyMessage="Dado não disponível na API atual"
+                  />
+                </div>
+                <div className="lg:col-span-6">
+                  <DataTable
+                    columns={[
+                      {
+                        key: "order_date",
+                        header: SALES_DAILY_COLUMN_LABELS.order_date,
+                        render: (r) => formatDate(r.order_date),
+                      },
+                      {
+                        key: "total_orders",
+                        header: SALES_DAILY_COLUMN_LABELS.total_orders,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatNumber(r.total_orders),
+                      },
+                      {
+                        key: "delivered_orders",
+                        header: SALES_DAILY_COLUMN_LABELS.delivered_orders,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatNumber(r.delivered_orders),
+                      },
+                      {
+                        key: "canceled_orders",
+                        header: SALES_DAILY_COLUMN_LABELS.canceled_orders,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatNumber(r.canceled_orders),
+                      },
+                      {
+                        key: "total_revenue",
+                        header: SALES_DAILY_COLUMN_LABELS.total_revenue,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatCurrencyBRL(r.total_revenue),
+                      },
+                      {
+                        key: "total_freight",
+                        header: "Frete total",
+                        className: "text-right tabular-nums",
+                        render: (r) => formatCurrencyBRL(r.total_freight),
+                      },
+                    ]}
+                    rows={salesDailyRecentRows}
+                    caption="Mostrando top 20 registros"
+                    emptyMessage="Dado não disponível na API atual"
                   />
                 </div>
               </div>
@@ -615,16 +845,43 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
           content: (
             <Section
               title={SECTION_TITLES.deliveryPerformance}
-              description="Identifique estados com maior taxa de atraso e maior tempo médio de entrega."
+              description="Detalhamento da performance logística por estado."
             >
-              <div className="grid items-stretch gap-6 lg:grid-cols-12">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <ExecutiveCard
+                  title="Total de pedidos"
+                  value={formatNumber(totalOrders)}
+                  description="Base de comparação usando a série de vendas filtrada."
+                />
+                <ExecutiveCard
+                  title="Pedidos entregues"
+                  value={formatNumber(totalDelivered)}
+                  description="Total de pedidos concluídos dentro do conjunto disponível."
+                />
+                <ExecutiveCard
+                  title="Pedidos atrasados"
+                  value={formatNumber(totalLate)}
+                  description="Volume de atrasos detectado por estado."
+                />
+                <ExecutiveCard
+                  title="Tempo médio"
+                  value={
+                    deliveryForKpi.length === 0
+                      ? "—"
+                      : `${(sum(deliveryForKpi, "avg_delivery_time_days") / deliveryForKpi.length).toFixed(2)} d`
+                  }
+                  description="Média simples da métrica disponível na API."
+                />
+              </div>
+
+              <div className="grid items-stretch gap-4 lg:grid-cols-12">
                 <div className="lg:col-span-7">
                   <ChartCard
-                    title="Taxa de atraso por estado (top 10)"
+                    title="Taxa de atraso por estado (top 20)"
                     subtitle="Ordenado por maior taxa de atraso."
                     className="min-h-[360px]"
                   >
-                    <DeliveryStateBarChart rows={deliveryForInsights} limit={10} />
+                    <DeliveryStateBarChart rows={deliveriesTop20} limit={20} />
                   </ChartCard>
                 </div>
                 <div className="lg:col-span-5 h-full">
@@ -649,15 +906,17 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                             ? "—"
                             : Number(r.avg_delivery_time_days).toFixed(2),
                       },
+                      {
+                        key: "avg_delay_days",
+                        header: DELIVERY_PERFORMANCE_COLUMN_LABELS.avg_delay_days,
+                        className: "text-right tabular-nums",
+                        render: (r) =>
+                          r.avg_delay_days == null ? "—" : Number(r.avg_delay_days).toFixed(2),
+                      },
                     ]}
-                    rows={[...deliveryForInsights]
-                      .sort(
-                        (a, b) =>
-                          (toNumber(b.late_delivery_rate) ?? 0) -
-                          (toNumber(a.late_delivery_rate) ?? 0),
-                      )
-                      .slice(0, 10)}
-                    caption="Mostrando top 10 registros"
+                    rows={deliveriesTop20}
+                    caption="Mostrando top 20 registros"
+                    emptyMessage="Dado não disponível na API atual"
                   />
                 </div>
               </div>
@@ -669,16 +928,39 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
           content: (
             <Section
               title={SECTION_TITLES.sellerPerformance}
-              description="Ranking top 10 por receita (sem nomes reais, apenas alias amigável)."
+              description="Ranking detalhado de vendedores com alias amigável e rastreabilidade."
             >
-              <div className="grid items-stretch gap-6 lg:grid-cols-12">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <ExecutiveCard
+                  title="Receita total"
+                  value={formatCurrencyBRL(sum(sellersFiltered, "total_revenue"))}
+                  description="Somatório dos vendedores na visão atual."
+                />
+                <ExecutiveCard
+                  title="Pedidos"
+                  value={formatNumber(sum(sellersFiltered, "total_orders"))}
+                  description="Volume total de pedidos atribuídos aos vendedores."
+                />
+                <ExecutiveCard
+                  title="Itens vendidos"
+                  value={formatNumber(sum(sellersFiltered, "total_items_sold"))}
+                  description="Itens vendidos pelos sellers exibidos."
+                />
+                <ExecutiveCard
+                  title="Frete total"
+                  value={formatCurrencyBRL(sum(sellersFiltered, "total_freight"))}
+                  description="Total de frete associado à performance dos vendedores."
+                />
+              </div>
+
+              <div className="grid items-stretch gap-4 lg:grid-cols-12">
                 <div className="lg:col-span-7">
                   <ChartCard
-                    title="Receita por vendedor (top 10)"
-                    subtitle="Ranking por receita total."
+                    title="Receita por vendedor (top 20)"
+                    subtitle="Ranking top 20 por receita total."
                     className="min-h-[360px]"
                   >
-                    <SellerRevenueBarChart data={sellerChartData} />
+                    <SellerRevenueBarChart data={sellerChartDataTop20} />
                   </ChartCard>
                 </div>
                 <div className="lg:col-span-5 h-full">
@@ -707,6 +989,24 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                         render: (r) => formatCurrencyBRL(r.total_revenue),
                       },
                       {
+                        key: "total_orders",
+                        header: SELLER_PERFORMANCE_COLUMN_LABELS.total_orders,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatNumber(r.total_orders),
+                      },
+                      {
+                        key: "total_items_sold",
+                        header: SELLER_PERFORMANCE_COLUMN_LABELS.total_items_sold,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatNumber(r.total_items_sold),
+                      },
+                      {
+                        key: "total_freight",
+                        header: SELLER_PERFORMANCE_COLUMN_LABELS.total_freight,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatCurrencyBRL(r.total_freight),
+                      },
+                      {
                         key: "avg_review_score",
                         header: SELLER_PERFORMANCE_COLUMN_LABELS.avg_review_score,
                         className: "text-right tabular-nums",
@@ -722,8 +1022,9 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                         render: (r) => formatPercent(r.late_delivery_rate),
                       },
                     ]}
-                    rows={sellersTop10}
-                    caption="Mostrando top 10 registros"
+                    rows={sellersTop20}
+                    caption="Mostrando top 20 registros"
+                    emptyMessage="Dado não disponível na API atual"
                   />
                 </div>
               </div>
@@ -735,16 +1036,43 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
           content: (
             <Section
               title={SECTION_TITLES.productPerformance}
-              description="Ranking top 10 de categorias por receita."
+              description="Ranking detalhado de categorias com métricas operacionais e financeiras."
             >
-              <div className="grid items-stretch gap-6 lg:grid-cols-12">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <ExecutiveCard
+                  title="Receita total"
+                  value={formatCurrencyBRL(sum(productsFiltered, "total_revenue"))}
+                  description="Somatório das categorias na visão atual."
+                />
+                <ExecutiveCard
+                  title="Pedidos"
+                  value={formatNumber(sum(productsFiltered, "total_orders"))}
+                  description="Pedidos associados às categorias exibidas."
+                />
+                <ExecutiveCard
+                  title="Itens vendidos"
+                  value={formatNumber(sum(productsFiltered, "total_items_sold"))}
+                  description="Itens vendidos pelas categorias da API."
+                />
+                <ExecutiveCard
+                  title="Frete médio"
+                  value={formatCurrencyBRL(
+                    productsFiltered.length > 0
+                      ? sum(productsFiltered, "avg_freight_value") / productsFiltered.length
+                      : null,
+                  )}
+                  description="Média simples do frete nas categorias disponíveis."
+                />
+              </div>
+
+              <div className="grid items-stretch gap-4 lg:grid-cols-12">
                 <div className="lg:col-span-7">
                   <ChartCard
-                    title="Receita por categoria (top 10)"
+                    title="Receita por categoria (top 20)"
                     subtitle="Ordenado por maior receita."
                     className="min-h-[360px]"
                   >
-                    <ProductCategoryBarChart rows={productsForInsights} limit={10} />
+                    <ProductCategoryBarChart rows={productsTop20} limit={20} />
                   </ChartCard>
                 </div>
                 <div className="lg:col-span-5 h-full">
@@ -754,6 +1082,18 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                         key: "product_category_name_english",
                         header:
                           PRODUCT_PERFORMANCE_COLUMN_LABELS.product_category_name_english,
+                      },
+                      {
+                        key: "total_orders",
+                        header: PRODUCT_PERFORMANCE_COLUMN_LABELS.total_orders,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatNumber(r.total_orders),
+                      },
+                      {
+                        key: "total_items_sold",
+                        header: PRODUCT_PERFORMANCE_COLUMN_LABELS.total_items_sold,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatNumber(r.total_items_sold),
                       },
                       {
                         key: "total_revenue",
@@ -767,15 +1107,23 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                         className: "text-right tabular-nums",
                         render: (r) => formatCurrencyBRL(r.avg_item_price),
                       },
+                      {
+                        key: "avg_freight_value",
+                        header: PRODUCT_PERFORMANCE_COLUMN_LABELS.avg_freight_value,
+                        className: "text-right tabular-nums",
+                        render: (r) => formatCurrencyBRL(r.avg_freight_value),
+                      },
+                      {
+                        key: "avg_review_score",
+                        header: PRODUCT_PERFORMANCE_COLUMN_LABELS.avg_review_score,
+                        className: "text-right tabular-nums",
+                        render: (r) =>
+                          r.avg_review_score == null ? "—" : Number(r.avg_review_score).toFixed(2),
+                      },
                     ]}
-                    rows={[...productsForInsights]
-                      .sort(
-                        (a, b) =>
-                          (toNumber(b.total_revenue) ?? 0) -
-                          (toNumber(a.total_revenue) ?? 0),
-                      )
-                      .slice(0, 10)}
-                    caption="Mostrando top 10 registros"
+                    rows={productsTop20}
+                    caption="Mostrando top 20 registros"
+                    emptyMessage="Dado não disponível na API atual"
                   />
                 </div>
               </div>
