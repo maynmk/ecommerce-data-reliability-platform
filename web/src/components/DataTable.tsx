@@ -12,22 +12,29 @@ export function DataTable<Row extends Record<string, unknown>>({
   rows,
   caption,
   emptyMessage = "Sem dados para exibir.",
+  className,
 }: {
   columns: ColumnDef<Row>[];
   rows: Row[];
   caption?: string;
   emptyMessage?: string;
+  className?: string;
 }) {
   return (
-    <div className="h-full rounded-2xl border border-emerald-500/15 bg-zinc-950/25 shadow-sm">
-      <div className="overflow-x-auto">
+    <div
+      className={[
+        "flex h-full flex-col rounded-2xl border border-emerald-500/15 bg-zinc-950/25 shadow-sm",
+        className ?? "",
+      ].join(" ")}
+    >
+      <div className="flex-1 overflow-auto">
         <table className="min-w-full text-sm">
           {caption ? (
             <caption className="px-4 py-3 text-left text-xs font-medium text-zinc-400">
               {caption}
             </caption>
           ) : null}
-          <thead className="border-b border-emerald-500/10 bg-zinc-950/35">
+          <thead className="sticky top-0 z-10 border-b border-emerald-500/10 bg-zinc-950/95 backdrop-blur">
             <tr>
               {columns.map((col) => (
                 <th

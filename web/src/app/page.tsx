@@ -254,12 +254,11 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
   const totalQualityIssues = reliabilityMetrics.reduce((acc, m) => acc + m.value, 0);
   const lateBadge = badgeForRate(lateRate);
   const salesMonthlyRows = aggregateMonthlySales(salesDailyFiltered);
-  const salesDailyRecentRows = [...salesDailyFiltered]
-    .sort((a, b) => String(a.order_date).localeCompare(String(b.order_date)))
-    .slice(-20);
+  const salesDailyDetailRows = [...salesDailyFiltered].sort((a, b) =>
+    String(a.order_date).localeCompare(String(b.order_date)),
+  );
   const qualityDetailRows = [...dataQuality]
-    .sort((a, b) => String(b.checked_at).localeCompare(String(a.checked_at)))
-    .slice(0, 20);
+    .sort((a, b) => String(b.checked_at).localeCompare(String(a.checked_at)));
 
   const sellersSortedAll = [...sellers].sort(
     (a, b) => (toNumber(b.total_revenue) ?? 0) - (toNumber(a.total_revenue) ?? 0),
@@ -298,6 +297,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
     };
   });
   const sellerChartDataTop6 = sellerChartDataTop20.slice(0, 6);
+  const sellersDetailRows = [...sellersDisplaySorted];
 
   const deliveryForInsights =
     stateFilter && deliveryFiltered.length === 0 ? delivery : deliveryFiltered;
@@ -315,12 +315,19 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
     .sort((a, b) => (toNumber(b.total_revenue) ?? 0) - (toNumber(a.total_revenue) ?? 0))
     .slice(0, 20);
   const productsTop6 = productsTop20.slice(0, 6);
+  const productsDetailRows = [...productsForInsights].sort(
+    (a, b) => (toNumber(b.total_revenue) ?? 0) - (toNumber(a.total_revenue) ?? 0),
+  );
   const deliveriesTop20 = [...deliveryForInsights]
     .sort(
       (a, b) =>
         (toNumber(b.late_delivery_rate) ?? 0) - (toNumber(a.late_delivery_rate) ?? 0),
     )
     .slice(0, 20);
+  const deliveriesDetailRows = [...deliveryForInsights].sort(
+    (a, b) =>
+      (toNumber(b.late_delivery_rate) ?? 0) - (toNumber(a.late_delivery_rate) ?? 0),
+  );
 
   const topCategory = [...productsForInsights]
     .map((r) => ({
@@ -646,7 +653,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                   Detalhamento dos indicadores de qualidade
                 </div>
                 <DataTable
-                  caption="Mostrando top 20 registros"
+                  caption="Tabela completa com rolagem interna"
                   columns={[
                     {
                       key: "metric_name",
@@ -691,6 +698,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                   ]}
                   rows={qualityDetailRows}
                   emptyMessage="Dado não disponível na API atual"
+                  className="h-[420px] md:h-[520px]"
                 />
               </div>
             </Section>
@@ -781,9 +789,10 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                         render: (r) => formatCurrencyBRL(r.total_freight),
                       },
                     ]}
-                    rows={salesMonthlyRows.slice(-20)}
-                    caption="Mostrando top 20 registros"
+                    rows={salesMonthlyRows}
+                    caption="Tabela completa com rolagem interna"
                     emptyMessage="Dado não disponível na API atual"
+                    className="h-[420px] md:h-[520px]"
                   />
                 </div>
                 <div className="lg:col-span-6">
@@ -825,9 +834,10 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                         render: (r) => formatCurrencyBRL(r.total_freight),
                       },
                     ]}
-                    rows={salesDailyRecentRows}
-                    caption="Mostrando top 20 registros"
+                    rows={salesDailyDetailRows}
+                    caption="Tabela completa com rolagem interna"
                     emptyMessage="Dado não disponível na API atual"
+                    className="h-[420px] md:h-[520px]"
                   />
                 </div>
               </div>
@@ -908,9 +918,10 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                           r.avg_delay_days == null ? "—" : Number(r.avg_delay_days).toFixed(2),
                       },
                     ]}
-                    rows={deliveriesTop20}
-                    caption="Mostrando top 20 registros"
+                    rows={deliveriesDetailRows}
+                    caption="Tabela completa com rolagem interna"
                     emptyMessage="Dado não disponível na API atual"
+                    className="h-[420px] md:h-[520px]"
                   />
                 </div>
               </div>
@@ -1016,9 +1027,10 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                         render: (r) => formatPercent(r.late_delivery_rate),
                       },
                     ]}
-                    rows={sellersTop20}
-                    caption="Mostrando top 20 registros"
+                    rows={sellersDetailRows}
+                    caption="Tabela completa com rolagem interna"
                     emptyMessage="Dado não disponível na API atual"
+                    className="h-[420px] md:h-[520px]"
                   />
                 </div>
               </div>
@@ -1117,9 +1129,10 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                           r.avg_review_score == null ? "—" : Number(r.avg_review_score).toFixed(2),
                       },
                     ]}
-                    rows={productsTop20}
-                    caption="Mostrando top 20 registros"
+                    rows={productsDetailRows}
+                    caption="Tabela completa com rolagem interna"
                     emptyMessage="Dado não disponível na API atual"
+                    className="h-[420px] md:h-[520px]"
                   />
                 </div>
               </div>
