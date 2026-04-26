@@ -63,6 +63,26 @@ export const PRODUCT_PERFORMANCE_COLUMN_LABELS: Record<string, string> = {
   avg_review_score: "Nota média",
 };
 
+export const PRODUCT_CATEGORY_FRIENDLY_LABELS: Record<string, string> = {
+  watches_gifts: "Relógios e presentes",
+  sports_leisure: "Esporte e lazer",
+  furniture_decor: "Móveis e decoração",
+  housewares: "Utilidades domésticas",
+  garden_tools: "Jardim",
+};
+
+export function labelProductCategory(value: string): string {
+  const normalized = value.trim();
+  if (!normalized) return value;
+  if (PRODUCT_CATEGORY_FRIENDLY_LABELS[normalized]) {
+    return PRODUCT_CATEGORY_FRIENDLY_LABELS[normalized];
+  }
+  return normalized
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 export const DATA_QUALITY_COLUMN_LABELS: Record<string, string> = {
   metric_name: "Métrica",
   metric_value: "Valor",

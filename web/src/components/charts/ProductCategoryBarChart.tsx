@@ -12,35 +12,33 @@ import {
 } from "recharts";
 
 import { formatCurrencyBRL, toNumber } from "@/lib/format";
+import { labelProductCategory } from "@/lib/labels";
 import type { ProductPerformanceRow } from "@/lib/types";
 
 function tooltipFormatter(value: unknown) {
   return formatCurrencyBRL(value);
 }
 
-function shortLabel(value: string): string {
-  const text = value.trim();
-  if (text.length <= 18) return text;
-  return `${text.slice(0, 16)}…`;
-}
-
 export function ProductCategoryBarChart({
   rows,
   limit = 10,
+  height,
 }: {
   rows: ProductPerformanceRow[];
   limit?: number;
+  height?: number;
 }) {
   const data = [...rows]
     .map((r) => ({
-      category: shortLabel(String(r.product_category_name_english ?? "unknown")),
+      category: labelProductCategory(String(r.product_category_name_english ?? "unknown")),
       total_revenue: toNumber(r.total_revenue) ?? 0,
     }))
     .sort((a, b) => b.total_revenue - a.total_revenue)
     .slice(0, limit);
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <div style={{ width: "100%", height: height ?? Math.max(320, data.length * 32 + 56) }}>
+      <ResponsiveContainer width="100%" height="100%">
       <BarChart
         data={data}
         layout="vertical"
@@ -77,5 +75,6 @@ export function ProductCategoryBarChart({
         <Bar dataKey="total_revenue" fill="#22c55e" radius={[0, 8, 8, 0]} />
       </BarChart>
     </ResponsiveContainer>
+    </div>
   );
 }

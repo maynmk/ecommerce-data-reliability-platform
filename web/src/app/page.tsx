@@ -32,6 +32,7 @@ import {
   SALES_DAILY_COLUMN_LABELS,
   SECTION_TITLES,
   SELLER_PERFORMANCE_COLUMN_LABELS,
+  labelProductCategory,
 } from "@/lib/labels";
 import {
   formatCurrencyBRL,
@@ -287,16 +288,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
     (a, b) => (toNumber(b.total_revenue) ?? 0) - (toNumber(a.total_revenue) ?? 0),
   );
 
-  const sellersTop10 = sellersDisplaySorted.slice(0, 10);
   const sellersTop20 = sellersDisplaySorted.slice(0, 20);
-  const sellerChartData = sellersTop10.map((row) => {
-    const meta = sellerAliases.get(String(row.seller_id));
-    return {
-      seller_label: meta?.alias ?? "Vendedor #???",
-      seller_id_trunc: meta?.seller_id_trunc ?? truncateId(row.seller_id),
-      total_revenue: toNumber(row.total_revenue) ?? 0,
-    };
-  });
   const sellerChartDataTop20 = sellersTop20.map((row) => {
     const meta = sellerAliases.get(String(row.seller_id));
     return {
@@ -305,6 +297,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
       total_revenue: toNumber(row.total_revenue) ?? 0,
     };
   });
+  const sellerChartDataTop6 = sellerChartDataTop20.slice(0, 6);
 
   const deliveryForInsights =
     stateFilter && deliveryFiltered.length === 0 ? delivery : deliveryFiltered;
@@ -321,6 +314,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
   const productsTop20 = [...productsForInsights]
     .sort((a, b) => (toNumber(b.total_revenue) ?? 0) - (toNumber(a.total_revenue) ?? 0))
     .slice(0, 20);
+  const productsTop6 = productsTop20.slice(0, 6);
   const deliveriesTop20 = [...deliveryForInsights]
     .sort(
       (a, b) =>
@@ -531,20 +525,20 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
               <div className="grid auto-rows-fr items-stretch gap-4 lg:grid-cols-12">
                 <div className="lg:col-span-4">
                   <ChartCard
-                    title="Receita por vendedor"
-                    subtitle="Top 10 vendedores por receita (alias amigável)."
-                    className="min-h-[320px]"
+                    title="Top 6 vendedores por receita"
+                    subtitle="Resumo executivo com alias amigável dos sellers."
+                    className="min-h-[260px]"
                   >
-                    <SellerRevenueBarChart data={sellerChartData} />
+                    <SellerRevenueBarChart data={sellerChartDataTop6} height={260} />
                   </ChartCard>
                 </div>
                 <div className="lg:col-span-4">
                   <ChartCard
-                    title="Receita por categoria"
-                    subtitle="Top 10 categorias por receita."
-                    className="min-h-[320px]"
+                    title="Top 6 categorias por receita"
+                    subtitle="Resumo executivo com labels amigáveis."
+                    className="min-h-[260px]"
                   >
-                    <ProductCategoryBarChart rows={productsForInsights} limit={10} />
+                    <ProductCategoryBarChart rows={productsTop6} limit={6} height={260} />
                   </ChartCard>
                 </div>
                 <div id="quality-center" className="lg:col-span-4 min-h-[320px]">
@@ -956,11 +950,11 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
               <div className="grid items-stretch gap-4 lg:grid-cols-12">
                 <div className="lg:col-span-7">
                   <ChartCard
-                    title="Receita por vendedor (top 20)"
+                    title="Top 20 vendedores por receita"
                     subtitle="Ranking top 20 por receita total."
-                    className="min-h-[360px]"
+                    className="min-h-[760px]"
                   >
-                    <SellerRevenueBarChart data={sellerChartDataTop20} />
+                    <SellerRevenueBarChart data={sellerChartDataTop20} height={760} />
                   </ChartCard>
                 </div>
                 <div className="lg:col-span-5 h-full">
@@ -1068,11 +1062,11 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
               <div className="grid items-stretch gap-4 lg:grid-cols-12">
                 <div className="lg:col-span-7">
                   <ChartCard
-                    title="Receita por categoria (top 20)"
+                    title="Top 20 categorias por receita"
                     subtitle="Ordenado por maior receita."
-                    className="min-h-[360px]"
+                    className="min-h-[760px]"
                   >
-                    <ProductCategoryBarChart rows={productsTop20} limit={20} />
+                    <ProductCategoryBarChart rows={productsTop20} limit={20} height={760} />
                   </ChartCard>
                 </div>
                 <div className="lg:col-span-5 h-full">
@@ -1082,6 +1076,8 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                         key: "product_category_name_english",
                         header:
                           PRODUCT_PERFORMANCE_COLUMN_LABELS.product_category_name_english,
+                        render: (r) =>
+                          labelProductCategory(String(r.product_category_name_english ?? "")),
                       },
                       {
                         key: "total_orders",

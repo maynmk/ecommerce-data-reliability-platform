@@ -15,15 +15,18 @@ import { formatCurrencyBRL } from "@/lib/format";
 
 export function SellerRevenueBarChart({
   data,
+  height,
 }: {
   data: Array<{
     seller_label: string;
     seller_id_trunc: string;
     total_revenue: number;
   }>;
+  height?: number;
 }) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <div style={{ width: "100%", height: height ?? Math.max(320, data.length * 32 + 56) }}>
+      <ResponsiveContainer width="100%" height="100%">
       <BarChart
         data={data}
         layout="vertical"
@@ -60,6 +63,7 @@ export function SellerRevenueBarChart({
         />
         <Bar dataKey="total_revenue" fill="#22c55e" radius={[0, 8, 8, 0]} />
       </BarChart>
-    </ResponsiveContainer>
+      </ResponsiveContainer>
+    </div>
   );
 }
