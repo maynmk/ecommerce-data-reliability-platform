@@ -652,9 +652,10 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                 <div className="mb-3 text-sm font-semibold text-zinc-50">
                   Detalhamento dos indicadores de qualidade
                 </div>
-                <DataTable
-                  caption="Tabela completa de indicadores de qualidade. Todos os registros disponíveis, com rolagem interna."
-                  columns={[
+                  <DataTable
+                    caption="Tabela completa de indicadores de qualidade. Todos os registros disponíveis, com rolagem interna."
+                    tableClassName="min-w-[900px]"
+                    columns={[
                     {
                       key: "metric_name",
                       header: DATA_QUALITY_COLUMN_LABELS.metric_name,
@@ -791,6 +792,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                     ]}
                     rows={salesMonthlyRows}
                     caption="Tabela completa de vendas mensais. Todos os registros disponíveis, com rolagem interna."
+                    tableClassName="min-w-[900px]"
                     emptyMessage="Dado não disponível na API atual"
                     className="h-[420px] md:h-[520px]"
                   />
@@ -836,6 +838,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                     ]}
                     rows={salesDailyDetailRows}
                     caption="Tabela completa de vendas diárias. Todos os registros disponíveis, com rolagem interna."
+                    tableClassName="min-w-[1100px]"
                     emptyMessage="Dado não disponível na API atual"
                     className="h-[420px] md:h-[520px]"
                   />
@@ -920,6 +923,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                     ]}
                     rows={deliveriesDetailRows}
                     caption="Tabela completa de estados. Todos os registros disponíveis, com rolagem interna."
+                    tableClassName="min-w-[900px]"
                     emptyMessage="Dado não disponível na API atual"
                     className="h-[420px] md:h-[520px]"
                   />
@@ -1033,6 +1037,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                     ]}
                     rows={sellersDetailRows}
                     caption="Tabela completa de vendedores. Todos os registros disponíveis, com rolagem interna."
+                    tableClassName="min-w-[1100px]"
                     emptyMessage="Dado não disponível na API atual"
                     className="h-[420px] md:h-[520px]"
                   />
@@ -1146,6 +1151,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                     ]}
                     rows={productsDetailRows}
                     caption="Tabela completa de categorias. Todos os registros disponíveis, com rolagem interna."
+                    tableClassName="min-w-[1100px]"
                     emptyMessage="Dado não disponível na API atual"
                     className="h-[420px] md:h-[520px]"
                   />
