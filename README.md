@@ -142,18 +142,21 @@ http://127.0.0.1:8000/docs
 
 O dashboard foi construido para mostrar o valor analitico da camada Gold. As telas que melhor representam o projeto sao:
 
+### Visao executiva
+
+![Dashboard overview](docs/images/dashboard-overview.png)
+
+### Confiabilidade e insights
+
+![Dashboard confiabilidade](docs/images/dashboard-confiabilidade.png)
+
+Essas capturas mostram a leitura principal do produto:
+
 - visao executiva com KPIs principais
 - grafico de vendas ao longo do tempo
 - ranking de vendedores
 - performance por produto e categoria
 - leitura de qualidade de dados
-
-Se quiser incluir imagens no README, use capturas do dashboard nessas secoes:
-
-- hero e KPIs
-- grafico de receita e pedidos
-- tabela de performance de vendedores
-- tabela ou cards de qualidade
 
 ## Como rodar localmente
 
